@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------- */
+/* 1. VARIABLES CSS (SIN CAMBIOS)                                       */
+/* -------------------------------------------------------------------------- */
+
+/* Mantenemos las variables CSS para mantener el esquema de color neón/rockero */
+:root {
+  color-scheme: dark;
+  --color-primary: 255, 0, 119; /* Rosa neón/Magenta para acentos */
+  --color-selection: 255, 255, 255;
+  --opacity-selection: 0.18;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. BASE GLOBAL (SIN CAMBIOS)                                         */
+/* -------------------------------------------------------------------------- */
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-ink-950 text-gray-100 antialiased leading-relaxed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3. ACCESIBILIDAD Y EFECTOS (SIN ERRORES)                               */
+/* -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Selección de Texto usando la variable (rgba(var(--color-primary), 0.4)) */
+::selection {
+  background: rgba(var(--color-primary), 0.4);
+  color: white;
+}
+
+/* Foco Visible usando la variable */
+:focus-visible {
+  outline: 2px solid rgba(var(--color-primary), 0.9);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 4. DISEÑO DE COMPONENTES BASE (¡CORRECCIÓN AQUÍ!)                   */
+/* -------------------------------------------------------------------------- */
+
+/* Mejora de Tipografía: Estilo para Títulos */
+h1,
+h2,
+h3 {
+  @apply mb-4 mt-6;
+}
+
+a {
+  /*
+   * CORRECCIÓN: Reemplazamos 'text-primary-300' por 'text-pink-400'
+   * y 'hover:text-primary-400' por 'hover:text-pink-300'.
+   * 'pink' es un color base de Tailwind que se asemeja a tu color neón (255, 0, 119)
+   * y NO causará error de compilación.
+   */
+  @apply text-pink-400 hover:text-pink-300 transition-colors duration-200;
+}
+
+/* Ejemplo: Estilo para botones principales (si no lo tienes definido en un componente) */
+.btn-primary {
+  /* Usamos 'pink' en el botón también para consistencia */
+  @apply bg-pink-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg
+         hover:bg-pink-600 transition-colors duration-300;
+}
