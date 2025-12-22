@@ -88,7 +88,6 @@ export function Nav() {
             onClick={() => setOpen((v) => !v)}
             className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-widest text-white border border-white/10 hover:bg-white/10 transition-all active:scale-95"
           >
-            <span>{open ? "Cerrar" : "Menú"}</span>
             <div className="flex flex-col gap-1 w-5">
               <span
                 className={`h-0.5 w-full bg-current transition-all ${
