@@ -9,7 +9,6 @@
     "lint": "eslint app components lib --ext .ts,.tsx --max-warnings=0"
   },
   "dependencies": {
-    "@vercel/blob": "^2.6.1",
     "next": "15.5.21",
     "react": "18.3.1",
     "react-dom": "18.3.1",

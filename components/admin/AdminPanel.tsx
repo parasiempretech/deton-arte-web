@@ -11,7 +11,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { upload } from "@vercel/blob/client";
 
 import {
   categoryKeys,
@@ -33,11 +32,6 @@ type ApiResult = {
 function formatBytes(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function safeExtension(fileName: string) {
-  const match = fileName.toLowerCase().match(/(\.[a-z0-9]{1,8})$/);
-  return match?.[1] ?? ".bin";
 }
 
 async function readApiResult(response: Response) {
@@ -196,7 +190,7 @@ export function AdminPanel({
     selectFiles(Array.from(event.dataTransfer.files));
   }
 
-  async function uploadLocal(file: File, category: CategoryKey) {
+  async function uploadToHosting(file: File, category: CategoryKey) {
     const formData = new FormData();
     formData.set("category", category);
     formData.set("file", file);
@@ -205,33 +199,6 @@ export function AdminPanel({
       await fetch("/api/panel/images", {
         body: formData,
         headers: { "x-csrf-token": csrfToken },
-        method: "POST",
-      }),
-    );
-  }
-
-  async function uploadToBlob(file: File, category: CategoryKey) {
-    const stagingPath = `deton-staging/${category}/${crypto.randomUUID()}${safeExtension(file.name)}`;
-    const blob = await upload(stagingPath, file, {
-      access: "public",
-      clientPayload: JSON.stringify({ category, csrf: csrfToken }),
-      contentType: file.type || "application/octet-stream",
-      handleUploadUrl: "/api/panel/blob",
-      headers: { "x-csrf-token": csrfToken },
-      multipart: file.size > 5 * 1024 * 1024,
-    });
-
-    return readApiResult(
-      await fetch("/api/panel/process", {
-        body: JSON.stringify({
-          category,
-          pathname: blob.pathname,
-          url: blob.url,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          "x-csrf-token": csrfToken,
-        },
         method: "POST",
       }),
     );
@@ -257,10 +224,7 @@ export function AdminPanel({
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
         setProgress(`Subiendo ${index + 1} de ${files.length}`);
-        const item =
-          storageMode === "blob"
-            ? await uploadToBlob(file, uploadCategory)
-            : await uploadLocal(file, uploadCategory);
+        const item = await uploadToHosting(file, uploadCategory);
         uploaded.push(item);
       }
 

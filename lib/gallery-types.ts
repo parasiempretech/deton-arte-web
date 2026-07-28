@@ -24,4 +24,4 @@ export type AdminGalleryItem =
   | ManagedGalleryItem
   | StaticAdminGalleryItem;
 
-export type StorageMode = "blob" | "local" | "unavailable";
+export type StorageMode = "filesystem" | "unavailable";

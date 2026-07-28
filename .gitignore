@@ -4,6 +4,7 @@ node_modules/
 history/
 .env
 .env.local
+.env.hostinger
 .DS_Store
 Thumbs.db
 npm-debug.log*

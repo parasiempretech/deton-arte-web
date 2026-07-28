@@ -3,7 +3,6 @@ import "server-only";
 import { createHash, randomUUID } from "crypto";
 import fs from "fs/promises";
 import path from "path";
-import { del, list, put, type ListBlobResultBlob } from "@vercel/blob";
 import sharp from "sharp";
 
 import type {
@@ -14,21 +13,20 @@ import type { CategoryKey } from "../site";
 import { isStaticGalleryItem } from "../static-gallery";
 import {
   categoryKeys,
-  isCategoryKey,
   MAX_IMAGE_PIXELS,
   MAX_OUTPUT_DIMENSION,
   MAX_UPLOAD_BYTES,
 } from "./constants";
 
-const BLOB_PREFIX = "deton-gallery";
-const STAGING_PREFIX = "deton-staging";
-const HIDDEN_STATIC_PREFIX = "deton-hidden";
-const LOCAL_ROOT = path.join(process.cwd(), "data", "gallery");
-const LOCAL_HIDDEN_ROOT = path.join(LOCAL_ROOT, ".hidden");
+const LOCAL_DEVELOPMENT_ROOT = path.join(
+  process.cwd(),
+  "data",
+  "gallery",
+);
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-type LocalMetadata = {
+type ImageMetadata = {
   category: CategoryKey;
   createdAt: string;
   height: number;
@@ -40,17 +38,70 @@ type LocalMetadata = {
 
 export class UploadValidationError extends Error {}
 
+function resolveStorageRoot() {
+  const configuredPath = process.env.GALLERY_STORAGE_PATH?.trim();
+  if (configuredPath) return path.resolve(configuredPath);
+
+  if (process.env.NODE_ENV !== "production") {
+    return LOCAL_DEVELOPMENT_ROOT;
+  }
+
+  const runtimeDirectory = process.cwd();
+  if (path.basename(runtimeDirectory).toLowerCase() === "nodejs") {
+    return path.join(
+      path.dirname(runtimeDirectory),
+      "deton-arte-storage",
+      "gallery",
+    );
+  }
+
+  const accountHome =
+    process.env.HOME?.trim() || process.env.USERPROFILE?.trim();
+  if (!accountHome) return null;
+
+  try {
+    const hostname = new URL(
+      process.env.NEXT_PUBLIC_SITE_URL ?? "",
+    ).hostname;
+    if (hostname) {
+      return path.join(
+        accountHome,
+        "domains",
+        hostname,
+        "deton-arte-storage",
+        "gallery",
+      );
+    }
+  } catch {
+    // La ruta general de la cuenta sigue siendo persistente.
+  }
+
+  return path.join(accountHome, "deton-arte-storage", "gallery");
+}
+
+function requireStorageRoot() {
+  const root = resolveStorageRoot();
+  if (!root) {
+    throw new UploadValidationError(
+      "El almacenamiento del hosting no está disponible.",
+    );
+  }
+  return root;
+}
+
 export function getStorageMode(): StorageMode {
-  if (process.env.BLOB_READ_WRITE_TOKEN?.trim()) return "blob";
-  if (process.env.NODE_ENV === "production") return "unavailable";
-  return "local";
+  return resolveStorageRoot() ? "filesystem" : "unavailable";
 }
 
 function getCategoryDirectory(category: CategoryKey) {
-  return path.join(LOCAL_ROOT, category);
+  return path.join(requireStorageRoot(), category);
 }
 
-function getLocalPaths(category: CategoryKey, id: string) {
+function getHiddenDirectory(category: CategoryKey) {
+  return path.join(requireStorageRoot(), ".hidden", category);
+}
+
+function getImagePaths(category: CategoryKey, id: string) {
   if (!UUID_PATTERN.test(id)) {
     throw new UploadValidationError("Identificador de imagen inválido.");
   }
@@ -118,7 +169,7 @@ async function normalizeImage(buffer: Buffer) {
   }
 }
 
-function toLocalItem(metadata: LocalMetadata): ManagedGalleryItem {
+function toManagedItem(metadata: ImageMetadata): ManagedGalleryItem {
   return {
     category: metadata.category,
     createdAt: metadata.createdAt,
@@ -132,7 +183,7 @@ function toLocalItem(metadata: LocalMetadata): ManagedGalleryItem {
   };
 }
 
-async function readLocalMetadata(
+async function readImageMetadata(
   category: CategoryKey,
   fileName: string,
 ): Promise<ManagedGalleryItem | null> {
@@ -143,7 +194,7 @@ async function readLocalMetadata(
       path.join(getCategoryDirectory(category), fileName),
       "utf8",
     );
-    const metadata = JSON.parse(raw) as Partial<LocalMetadata>;
+    const metadata = JSON.parse(raw) as Partial<ImageMetadata>;
 
     if (
       !UUID_PATTERN.test(metadata.id ?? "") ||
@@ -166,145 +217,75 @@ async function readLocalMetadata(
       return null;
     }
 
-    const paths = getLocalPaths(category, metadata.id as string);
+    const paths = getImagePaths(category, metadata.id as string);
     await fs.access(paths.image);
-    return toLocalItem(metadata as LocalMetadata);
+    return toManagedItem(metadata as ImageMetadata);
   } catch {
     return null;
   }
 }
 
-async function listLocalImages(category: CategoryKey) {
+async function listCategoryImages(category: CategoryKey) {
   const directory = getCategoryDirectory(category);
 
   try {
     const fileNames = await fs.readdir(directory);
     const items = await Promise.all(
-      fileNames.map((fileName) => readLocalMetadata(category, fileName)),
+      fileNames.map((fileName) =>
+        readImageMetadata(category, fileName),
+      ),
     );
 
     return items
       .filter((item): item is ManagedGalleryItem => item !== null)
-      .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+      .sort((left, right) =>
+        right.createdAt.localeCompare(left.createdAt),
+      );
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
     throw error;
   }
 }
 
-function parseBlobItem(blob: ListBlobResultBlob): ManagedGalleryItem | null {
-  const match = blob.pathname.match(
-    /^deton-gallery\/(cuadros|mascotas|murales|telas|cositas)\/\d+-([0-9a-f-]{36})-(\d+)x(\d+)\.webp$/i,
-  );
-
-  if (!match || !isCategoryKey(match[1]) || !UUID_PATTERN.test(match[2])) {
-    return null;
-  }
-
-  const width = Number(match[3]);
-  const height = Number(match[4]);
-  if (
-    !Number.isSafeInteger(width) ||
-    !Number.isSafeInteger(height) ||
-    width <= 0 ||
-    height <= 0 ||
-    width > MAX_OUTPUT_DIMENSION ||
-    height > MAX_OUTPUT_DIMENSION
-  ) {
-    return null;
-  }
-
-  return {
-    category: match[1],
-    createdAt: blob.uploadedAt.toISOString(),
-    height,
-    id: match[2],
-    managed: true,
-    size: blob.size,
-    source: "managed",
-    src: blob.url,
-    width,
-  };
-}
-
-async function listBlobImages(category?: CategoryKey) {
-  const prefix = category
-    ? `${BLOB_PREFIX}/${category}/`
-    : `${BLOB_PREFIX}/`;
-  const blobs: ListBlobResultBlob[] = [];
-  let cursor: string | undefined;
-
-  do {
-    const result = await list({ cursor, limit: 1000, prefix });
-    blobs.push(...result.blobs);
-    cursor = result.hasMore ? result.cursor : undefined;
-  } while (cursor);
-
-  return blobs
-    .map(parseBlobItem)
-    .filter((item): item is ManagedGalleryItem => item !== null)
-    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
-}
-
-async function cleanupStaleStagingBlobs() {
-  const expiration = Date.now() - 60 * 60 * 1000;
-  const stalePathnames: string[] = [];
-  let cursor: string | undefined;
-
-  do {
-    const result = await list({
-      cursor,
-      limit: 1000,
-      prefix: `${STAGING_PREFIX}/`,
-    });
-    result.blobs.forEach((blob) => {
-      if (blob.uploadedAt.getTime() < expiration) {
-        stalePathnames.push(blob.pathname);
-      }
-    });
-    cursor = result.hasMore ? result.cursor : undefined;
-  } while (cursor);
-
-  if (stalePathnames.length) await del(stalePathnames);
-}
-
 export async function listManagedImages(category: CategoryKey) {
-  const mode = getStorageMode();
-  if (mode === "blob") return listBlobImages(category);
-  if (mode === "local") return listLocalImages(category);
-  return [];
+  if (getStorageMode() !== "filesystem") return [];
+  return listCategoryImages(category);
 }
 
 export async function listAllManagedImages() {
-  const mode = getStorageMode();
-  if (mode === "blob") {
-    await cleanupStaleStagingBlobs();
-    return listBlobImages();
-  }
-  if (mode === "unavailable") return [];
+  if (getStorageMode() !== "filesystem") return [];
 
-  const grouped = await Promise.all(categoryKeys.map(listLocalImages));
-  return grouped.flat().sort((left, right) =>
-    right.createdAt.localeCompare(left.createdAt),
+  const grouped = await Promise.all(
+    categoryKeys.map(listCategoryImages),
   );
+  return grouped
+    .flat()
+    .sort((left, right) =>
+      right.createdAt.localeCompare(left.createdAt),
+    );
 }
 
-export async function saveLocalUpload(file: File, category: CategoryKey) {
-  if (getStorageMode() !== "local") {
+export async function saveFilesystemUpload(
+  file: File,
+  category: CategoryKey,
+) {
+  if (getStorageMode() !== "filesystem") {
     throw new UploadValidationError(
-      "El almacenamiento local no está disponible en este entorno.",
+      "El almacenamiento del hosting no está disponible.",
     );
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new UploadValidationError("La imagen supera el límite de 40 MB.");
+    throw new UploadValidationError(
+      "La imagen supera el límite de 40 MB.",
+    );
   }
 
   const normalized = await normalizeImage(
     Buffer.from(await file.arrayBuffer()),
   );
   const id = randomUUID();
-  const paths = getLocalPaths(category, id);
-  const metadata: LocalMetadata = {
+  const paths = getImagePaths(category, id);
+  const metadata: ImageMetadata = {
     category,
     createdAt: new Date().toISOString(),
     height: normalized.height,
@@ -317,7 +298,9 @@ export async function saveLocalUpload(file: File, category: CategoryKey) {
   await fs.mkdir(paths.directory, { recursive: true });
 
   try {
-    await fs.writeFile(`${paths.image}.tmp`, normalized.buffer, { flag: "wx" });
+    await fs.writeFile(`${paths.image}.tmp`, normalized.buffer, {
+      flag: "wx",
+    });
     await fs.rename(`${paths.image}.tmp`, paths.image);
     await fs.writeFile(
       `${paths.metadata}.tmp`,
@@ -335,123 +318,7 @@ export async function saveLocalUpload(file: File, category: CategoryKey) {
     throw error;
   }
 
-  return toLocalItem(metadata);
-}
-
-function isTrustedBlobUrl(value: string) {
-  try {
-    const url = new URL(value);
-    return (
-      url.protocol === "https:" &&
-      url.hostname.endsWith(".public.blob.vercel-storage.com")
-    );
-  } catch {
-    return false;
-  }
-}
-
-function blobUrlMatchesPath(urlValue: string, pathname: string) {
-  try {
-    const url = new URL(urlValue);
-    const decodedPath = decodeURIComponent(url.pathname).replace(/^\/+/, "");
-    return decodedPath === pathname;
-  } catch {
-    return false;
-  }
-}
-
-async function readResponseWithLimit(response: Response, limit: number) {
-  if (!response.body) {
-    throw new UploadValidationError("No se pudo leer la imagen cargada.");
-  }
-
-  const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let totalBytes = 0;
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (!value) continue;
-
-      totalBytes += value.byteLength;
-      if (totalBytes > limit) {
-        await reader.cancel();
-        throw new UploadValidationError(
-          "La imagen supera el límite de 40 MB.",
-        );
-      }
-      chunks.push(value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-
-  return Buffer.concat(
-    chunks.map((chunk) => Buffer.from(chunk)),
-    totalBytes,
-  );
-}
-
-export async function processStagedBlob(input: {
-  category: CategoryKey;
-  pathname: string;
-  url: string;
-}) {
-  if (getStorageMode() !== "blob") {
-    throw new UploadValidationError(
-      "El almacenamiento permanente no está configurado.",
-    );
-  }
-  if (
-    !isTrustedBlobUrl(input.url) ||
-    !blobUrlMatchesPath(input.url, input.pathname) ||
-    !input.pathname.startsWith(`${STAGING_PREFIX}/${input.category}/`)
-  ) {
-    throw new UploadValidationError("La carga temporal no es válida.");
-  }
-
-  try {
-    const response = await fetch(input.url, {
-      cache: "no-store",
-      signal: AbortSignal.timeout(30_000),
-    });
-    if (!response.ok) {
-      throw new UploadValidationError("No se pudo leer la imagen cargada.");
-    }
-
-    const contentLength = Number(response.headers.get("content-length") ?? 0);
-    if (contentLength > MAX_UPLOAD_BYTES) {
-      throw new UploadValidationError("La imagen supera el límite de 40 MB.");
-    }
-
-    const source = await readResponseWithLimit(response, MAX_UPLOAD_BYTES);
-    const normalized = await normalizeImage(source);
-    const id = randomUUID();
-    const createdAt = Date.now();
-    const pathname = `${BLOB_PREFIX}/${input.category}/${createdAt}-${id}-${normalized.width}x${normalized.height}.webp`;
-    const blob = await put(pathname, normalized.buffer, {
-      access: "public",
-      addRandomSuffix: false,
-      cacheControlMaxAge: 31_536_000,
-      contentType: "image/webp",
-    });
-
-    return {
-      category: input.category,
-      createdAt: new Date(createdAt).toISOString(),
-      height: normalized.height,
-      id,
-      managed: true,
-      size: normalized.size,
-      source: "managed",
-      src: blob.url,
-      width: normalized.width,
-    } satisfies ManagedGalleryItem;
-  } finally {
-    await del(input.pathname).catch(() => undefined);
-  }
+  return toManagedItem(metadata);
 }
 
 export async function deleteManagedImage(
@@ -459,46 +326,24 @@ export async function deleteManagedImage(
   id: string,
 ) {
   if (!UUID_PATTERN.test(id)) {
-    throw new UploadValidationError("Identificador de imagen inválido.");
+    throw new UploadValidationError(
+      "Identificador de imagen inválido.",
+    );
+  }
+  if (getStorageMode() !== "filesystem") {
+    throw new UploadValidationError(
+      "El almacenamiento del hosting no está disponible.",
+    );
   }
 
-  const mode = getStorageMode();
-  if (mode === "local") {
-    const paths = getLocalPaths(category, id);
-    const results = await Promise.allSettled([
-      fs.rm(paths.image, { force: true }),
-      fs.rm(paths.metadata, { force: true }),
-    ]);
-    if (results.some((result) => result.status === "rejected")) {
-      throw new Error("No se pudo eliminar la imagen.");
-    }
-    return;
+  const paths = getImagePaths(category, id);
+  const results = await Promise.allSettled([
+    fs.rm(paths.image, { force: true }),
+    fs.rm(paths.metadata, { force: true }),
+  ]);
+  if (results.some((result) => result.status === "rejected")) {
+    throw new Error("No se pudo eliminar la imagen.");
   }
-
-  if (mode === "blob") {
-    let blob: ListBlobResultBlob | undefined;
-    let cursor: string | undefined;
-
-    do {
-      const result = await list({
-        cursor,
-        limit: 1000,
-        prefix: `${BLOB_PREFIX}/${category}/`,
-      });
-      blob = result.blobs.find((item) =>
-        item.pathname.includes(`-${id}-`),
-      );
-      cursor = !blob && result.hasMore ? result.cursor : undefined;
-    } while (!blob && cursor);
-
-    if (!blob) throw new UploadValidationError("La imagen ya no existe.");
-    await del(blob.pathname);
-    return;
-  }
-
-  throw new UploadValidationError(
-    "El almacenamiento permanente no está configurado.",
-  );
 }
 
 export function getStaticImageKey(category: CategoryKey, id: string) {
@@ -507,57 +352,28 @@ export function getStaticImageKey(category: CategoryKey, id: string) {
     .digest("hex");
 }
 
-function getLocalHiddenDirectory(category: CategoryKey) {
-  return path.join(LOCAL_HIDDEN_ROOT, category);
+async function listHiddenKeysForCategory(category: CategoryKey) {
+  try {
+    const names = await fs.readdir(getHiddenDirectory(category));
+    return names
+      .filter((name) => /^[0-9a-f]{64}\.hidden$/i.test(name))
+      .map((name) => name.slice(0, -".hidden".length));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
 }
 
-async function listLocalHiddenStaticImageKeys(category?: CategoryKey) {
+export async function listHiddenStaticImageKeys(
+  category?: CategoryKey,
+) {
+  if (getStorageMode() !== "filesystem") return new Set<string>();
+
   const categories = category ? [category] : categoryKeys;
   const grouped = await Promise.all(
-    categories.map(async (currentCategory) => {
-      try {
-        const names = await fs.readdir(
-          getLocalHiddenDirectory(currentCategory),
-        );
-        return names
-          .filter((name) => /^[0-9a-f]{64}\.hidden$/i.test(name))
-          .map((name) => name.slice(0, -".hidden".length));
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
-        throw error;
-      }
-    }),
+    categories.map(listHiddenKeysForCategory),
   );
-
   return new Set(grouped.flat());
-}
-
-async function listBlobHiddenStaticImageKeys(category?: CategoryKey) {
-  const prefix = category
-    ? `${HIDDEN_STATIC_PREFIX}/${category}/`
-    : `${HIDDEN_STATIC_PREFIX}/`;
-  const keys = new Set<string>();
-  let cursor: string | undefined;
-
-  do {
-    const result = await list({ cursor, limit: 1000, prefix });
-    result.blobs.forEach((blob) => {
-      const match = blob.pathname.match(
-        /^deton-hidden\/(?:cuadros|mascotas|murales|telas|cositas)\/([0-9a-f]{64})\.hidden$/i,
-      );
-      if (match) keys.add(match[1]);
-    });
-    cursor = result.hasMore ? result.cursor : undefined;
-  } while (cursor);
-
-  return keys;
-}
-
-export async function listHiddenStaticImageKeys(category?: CategoryKey) {
-  const mode = getStorageMode();
-  if (mode === "blob") return listBlobHiddenStaticImageKeys(category);
-  if (mode === "local") return listLocalHiddenStaticImageKeys(category);
-  return new Set<string>();
 }
 
 export async function hideStaticImage(
@@ -567,57 +383,39 @@ export async function hideStaticImage(
   if (!isStaticGalleryItem(category, id)) {
     throw new UploadValidationError("La imagen ya no existe.");
   }
+  if (getStorageMode() !== "filesystem") {
+    throw new UploadValidationError(
+      "El almacenamiento del hosting no está disponible.",
+    );
+  }
 
+  const directory = getHiddenDirectory(category);
   const key = getStaticImageKey(category, id);
-  const mode = getStorageMode();
-
-  if (mode === "local") {
-    const directory = getLocalHiddenDirectory(category);
-    await fs.mkdir(directory, { recursive: true });
-    await fs.writeFile(
-      path.join(directory, `${key}.hidden`),
-      new Date().toISOString(),
-      "utf8",
-    );
-    return;
-  }
-
-  if (mode === "blob") {
-    await put(
-      `${HIDDEN_STATIC_PREFIX}/${category}/${key}.hidden`,
-      new Date().toISOString(),
-      {
-        access: "public",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        contentType: "text/plain; charset=utf-8",
-      },
-    );
-    return;
-  }
-
-  throw new UploadValidationError(
-    "El almacenamiento permanente no está configurado.",
-  );
+  await fs.mkdir(directory, { recursive: true });
+  await fs.writeFile(
+    path.join(directory, `${key}.hidden`),
+    new Date().toISOString(),
+    { encoding: "utf8", flag: "wx" },
+  ).catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== "EEXIST") throw error;
+  });
 }
 
-export async function readLocalImage(
+export async function readFilesystemImage(
   category: CategoryKey,
   fileName: string,
 ) {
   const match = fileName.match(
     /^([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.webp$/i,
   );
-  if (!match) return null;
+  if (!match || getStorageMode() !== "filesystem") return null;
 
   try {
-    return await fs.readFile(getLocalPaths(category, match[1]).image);
+    return await fs.readFile(
+      getImagePaths(category, match[1]).image,
+    );
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw error;
   }
-}
-
-export function getStagingPrefix(category: CategoryKey) {
-  return `${STAGING_PREFIX}/${category}/`;
 }

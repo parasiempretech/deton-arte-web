@@ -18,23 +18,24 @@ npm run dev
 - Sitio: `http://localhost:3000`
 - Panel privado: `http://localhost:3000/panel`
 
-En desarrollo sin Blob configurado, las imágenes nuevas se guardan en
-`data/gallery`. Los archivos de esa carpeta son locales y no se versionan.
+En desarrollo, las imágenes nuevas se guardan en `data/gallery`. Los archivos
+de esa carpeta son locales y no se versionan.
 
 ## Producción
 
-1. Creá un Blob Store **público** conectado al proyecto.
-2. Configurá `BLOB_READ_WRITE_TOKEN` en el proveedor donde se ejecute la web.
-   Vercel la agrega automáticamente al conectar el Store.
-3. Configurá `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET` y
+1. Configurá `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET` y
    `NEXT_PUBLIC_SITE_URL` en las variables del proyecto.
-4. Desplegá normalmente como una aplicación Next.js en Vercel o Hostinger.
+2. Desplegá normalmente como una aplicación Next.js en Hostinger.
+
+En producción, el panel guarda las imágenes en
+`domains/detonar73.site/deton-arte-storage/gallery`, fuera del directorio
+`nodejs` que Hostinger reconstruye en cada despliegue. Se puede indicar otra
+ruta absoluta mediante `GALLERY_STORAGE_PATH`.
 
 El panel sube los archivos directamente al almacenamiento, valida que sean
 imágenes, corrige la orientación, limita dimensiones, elimina metadatos y
 publica una versión WebP optimizada. Los nombres originales no se usan como
-rutas públicas. En producción, la administración se desactiva de forma segura
-si el almacenamiento permanente no está configurado.
+rutas públicas.
 
 ## Validación
 

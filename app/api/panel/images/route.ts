@@ -5,7 +5,7 @@ import {
   deleteManagedImage,
   getStorageMode,
   hideStaticImage,
-  saveLocalUpload,
+  saveFilesystemUpload,
   UploadValidationError,
 } from "@/lib/admin/storage";
 
@@ -16,10 +16,10 @@ export async function POST(request: Request) {
   if (!(await authorizeMutation(request, csrfToken))) {
     return Response.json({ error: "Sesión no autorizada." }, { status: 401 });
   }
-  if (getStorageMode() !== "local") {
+  if (getStorageMode() !== "filesystem") {
     return Response.json(
-      { error: "Esta ruta solo está disponible en desarrollo local." },
-      { status: 409 },
+      { error: "El almacenamiento del hosting no está disponible." },
+      { status: 503 },
     );
   }
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const item = await saveLocalUpload(file, category);
+    const item = await saveFilesystemUpload(file, category);
     revalidatePath(`/${category}`);
     revalidatePath("/panel");
 

@@ -1,5 +1,5 @@
 import { isCategoryKey } from "@/lib/admin/constants";
-import { readLocalImage } from "@/lib/admin/storage";
+import { readFilesystemImage } from "@/lib/admin/storage";
 
 export const runtime = "nodejs";
 
@@ -12,7 +12,7 @@ export async function GET(
     return new Response(null, { status: 404 });
   }
 
-  const image = await readLocalImage(category, file);
+  const image = await readFilesystemImage(category, file);
   if (!image) return new Response(null, { status: 404 });
 
   return new Response(new Uint8Array(image), {
