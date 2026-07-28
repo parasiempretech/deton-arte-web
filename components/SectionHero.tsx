@@ -69,16 +69,7 @@ function PortraitHero({
 }: Omit<Props, "variant">) {
   return (
     <section className="relative isolate overflow-hidden border-b border-white/[0.08] bg-[#070708]">
-      <div className="absolute inset-0 -z-30">
-        <Image
-          src={coverSrc}
-          alt=""
-          fill
-          className="scale-110 object-cover object-center opacity-[0.05] blur-2xl"
-          sizes="100vw"
-        />
-      </div>
-      <div className="absolute inset-0 -z-20 bg-[linear-gradient(100deg,#070708_6%,rgba(7,7,8,0.97)_56%,rgba(7,7,8,0.84)_100%)]" />
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_78%_48%,rgba(128,24,34,0.12),transparent_28rem),linear-gradient(100deg,#070708_6%,#080708_100%)]" />
       <div className="grain-overlay absolute inset-0 -z-10 opacity-25" />
 
       <Container>

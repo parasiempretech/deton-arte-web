@@ -169,10 +169,7 @@ export function Nav() {
 
   return (
     <header
-      className={[
-        "sticky top-0 z-50 border-b border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition-colors duration-200",
-        open ? "bg-[#08080a]" : "bg-[#08080a]/[0.88]",
-      ].join(" ")}
+      className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#08080a] shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
     >
       <div className="h-[3px] bg-gradient-to-r from-red-700 via-red-500 to-amber-200/70" />
 
@@ -189,7 +186,7 @@ export function Nav() {
                 alt="Logo DetonAR73"
                 fill
                 className="scale-[1.08] object-cover object-top"
-                priority
+                loading="eager"
                 sizes="48px"
               />
             </span>

@@ -5,11 +5,11 @@ import { categories, site } from "@/lib/site";
 import { Conditions } from "@/components/Conditions";
 
 const categoryCovers = {
-  cuadros: { src: "/covers/cuadros.png", width: 896, height: 1152 },
+  cuadros: { src: "/covers/cuadros.webp", width: 896, height: 1152 },
   mascotas: { src: "/covers/mascotas.jpg", width: 533, height: 677 },
   murales: { src: "/covers/murales.jpg", width: 1900, height: 1365 },
   telas: { src: "/covers/telas.webp", width: 1440, height: 1080 },
-  cositas: { src: "/covers/cositas.png", width: 1080, height: 1920 },
+  cositas: { src: "/covers/cositas.webp", width: 1080, height: 1920 },
 };
 
 function SectionHeader({
@@ -63,7 +63,7 @@ function ProcessStep({
         <p className="mt-3 text-sm leading-6 text-white/[0.62] sm:text-base">
           {description}
         </p>
-        <p className="mt-6 text-xs italic leading-5 text-white/[0.42]">
+        <p className="mt-6 font-[family-name:var(--font-display)] text-sm italic leading-5 text-white/[0.42]">
           {footnote}
         </p>
       </div>
@@ -122,16 +122,7 @@ export default function HomePage() {
   return (
     <>
       <section className="relative isolate overflow-hidden border-b border-white/[0.08]">
-        <div className="absolute inset-0 -z-20">
-          <Image
-            src="/covers/home.png"
-            alt=""
-            fill
-            sizes="100vw"
-            className="scale-110 object-cover opacity-[0.055] blur-2xl"
-          />
-        </div>
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(105deg,rgba(4,4,5,0.99)_5%,rgba(6,6,7,0.95)_54%,rgba(6,6,7,0.76)_100%)]" />
+        <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_76%_44%,rgba(128,24,34,0.14),transparent_34rem),linear-gradient(105deg,#040405_5%,#060607_54%,#080708_100%)]" />
         <div className="grain-overlay absolute inset-0 -z-10 opacity-45" />
 
         <Container className="max-w-[1440px]">
@@ -183,7 +174,7 @@ export default function HomePage() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="bg-[#0a0a0c]/90 px-4 py-4 backdrop-blur-md"
+                    className="bg-[#0a0a0c] px-4 py-4"
                   >
                     <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-red-300/70">
                       {item.label}

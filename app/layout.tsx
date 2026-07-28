@@ -14,7 +14,7 @@ const displayFont = Newsreader({
 const bodyFont = IBM_Plex_Sans({
   subsets: ["latin"],
   weight: "variable",
-  style: ["normal", "italic"],
+  style: "normal",
   axes: ["wdth"],
   variable: "--font-body",
 });
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/og.png",
+        url: "/og.jpg",
         width: 1536,
         height: 1024,
         alt: "Deton Arte",
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
-    images: ["/og.png"],
+    images: ["/og.jpg"],
   },
 };
 

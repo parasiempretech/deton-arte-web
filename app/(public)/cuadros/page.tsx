@@ -18,7 +18,7 @@ export default async function Page() {
     <CategoryPage
       title="Cuadros"
       subtitle={description}
-      coverSrc="/covers/cuadros.png"
+      coverSrc="/covers/cuadros.webp"
       items={items}
     />
   );

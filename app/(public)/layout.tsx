@@ -16,12 +16,6 @@ export default function PublicLayout({
         Saltar al contenido
       </a>
 
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-[#070708]" />
-        <div className="absolute -left-48 -top-52 h-[38rem] w-[38rem] rounded-full bg-red-700/[0.05] blur-[130px]" />
-        <div className="grain-overlay absolute inset-0 opacity-30 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
-      </div>
-
       <div className="flex min-h-dvh flex-col">
         <Nav />
         <main id="main-content" tabIndex={-1} className="page-enter flex-1">

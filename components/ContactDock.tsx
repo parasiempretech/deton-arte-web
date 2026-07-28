@@ -34,7 +34,7 @@ export function ContactDock() {
         href={site.whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex min-h-12 items-center gap-2.5 rounded-full border border-red-300/25 bg-[#151416]/95 p-1.5 pr-1.5 text-white shadow-[0_14px_34px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl transition-colors duration-200 hover:border-red-300/45 hover:bg-[#1b181a] sm:pr-4"
+        className="group flex min-h-12 items-center gap-2.5 rounded-full border border-red-300/25 bg-[#151416] p-1.5 pr-1.5 text-white shadow-[0_14px_34px_-20px_rgba(0,0,0,0.9)] transition-colors duration-200 hover:border-red-300/45 hover:bg-[#1b181a] sm:pr-4"
       >
         <span
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-600 font-[family-name:var(--font-body)] text-xs font-semibold tracking-[0.01em] text-white transition-colors group-hover:bg-red-500"

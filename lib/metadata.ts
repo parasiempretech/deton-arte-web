@@ -25,7 +25,7 @@ export function createPageMetadata({
       url: path,
       images: [
         {
-          url: "/og.png",
+          url: "/og.jpg",
           width: 1536,
           height: 1024,
           alt: "Deton Arte",
@@ -36,7 +36,7 @@ export function createPageMetadata({
       card: "summary_large_image",
       title: `${title} | Deton Arte`,
       description,
-      images: ["/og.png"],
+      images: ["/og.jpg"],
     },
   };
 }
