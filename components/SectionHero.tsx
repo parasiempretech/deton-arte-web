@@ -19,9 +19,7 @@ function HeroCopy({
 }: Pick<Props, "title" | "subtitle" | "badge"> & { compact?: boolean }) {
   return (
     <div className="min-w-0 max-w-3xl">
-      <Badge className="shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)]">
-        {badge ?? `@${site.handle}`}
-      </Badge>
+      <Badge>{badge ?? `@${site.handle}`}</Badge>
 
       <h1
         className={[
@@ -76,15 +74,15 @@ function PortraitHero({
           src={coverSrc}
           alt=""
           fill
-          className="scale-110 object-cover object-center opacity-[0.07] blur-2xl"
+          className="scale-110 object-cover object-center opacity-[0.05] blur-2xl"
           sizes="100vw"
         />
       </div>
-      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_76%_38%,rgba(240,47,60,0.12),transparent_28rem),linear-gradient(100deg,#070708_6%,rgba(7,7,8,0.97)_53%,rgba(7,7,8,0.8)_100%)]" />
-      <div className="grain-overlay absolute inset-0 -z-10 opacity-45" />
+      <div className="absolute inset-0 -z-20 bg-[linear-gradient(100deg,#070708_6%,rgba(7,7,8,0.97)_56%,rgba(7,7,8,0.84)_100%)]" />
+      <div className="grain-overlay absolute inset-0 -z-10 opacity-25" />
 
       <Container>
-        <div className="grid min-h-[620px] items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14 lg:py-10">
+        <div className="grid items-center gap-8 py-10 sm:gap-10 sm:py-14 lg:min-h-[620px] lg:grid-cols-[1.08fr_0.92fr] lg:gap-14 lg:py-10">
           <HeroCopy
             title={title}
             subtitle={subtitle}
@@ -93,16 +91,14 @@ function PortraitHero({
           />
 
           <div className="relative mx-auto w-full max-w-[500px] lg:justify-self-end">
-            <div className="absolute inset-[8%] rounded-full bg-red-600/[0.12] blur-[70px]" />
-
-            <figure className="group relative mx-auto w-[82%] sm:w-[78%] lg:w-[86%]">
+            <figure className="group relative mx-auto w-[58%] max-w-[270px] sm:w-[68%] sm:max-w-[380px] lg:w-[86%] lg:max-w-none">
               <Image
                 src={coverSrc}
                 alt="Deton AR73"
                 width={1153}
                 height={1612}
                 priority
-                className="h-auto w-full drop-shadow-[0_34px_45px_rgba(0,0,0,0.52)] transition-transform duration-700 ease-out group-hover:-translate-y-1 group-hover:scale-[1.006]"
+                className="h-auto w-full drop-shadow-[0_26px_38px_rgba(0,0,0,0.46)]"
                 sizes="(max-width: 640px) 82vw, (max-width: 1024px) 62vw, 430px"
               />
               <figcaption className="mt-4 flex items-center gap-3">
@@ -138,7 +134,7 @@ export function SectionHero({
   }
 
   return (
-    <section className="relative isolate min-h-[520px] overflow-hidden border-b border-white/[0.08] sm:min-h-[590px]">
+    <section className="relative isolate min-h-[490px] overflow-hidden border-b border-white/[0.08] sm:min-h-[560px]">
       <div className="absolute inset-0 -z-30">
         <Image
           src={coverSrc}
@@ -152,7 +148,7 @@ export function SectionHero({
 
       <div className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(4,4,5,0.99)_0%,rgba(4,4,5,0.93)_38%,rgba(4,4,5,0.46)_72%,rgba(4,4,5,0.35)_100%)] max-sm:bg-[linear-gradient(180deg,rgba(4,4,5,0.38)_0%,rgba(4,4,5,0.74)_38%,rgba(4,4,5,0.98)_100%)]" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#070708] via-transparent to-black/30" />
-      <div className="grain-overlay absolute inset-0 -z-10 opacity-55" />
+      <div className="grain-overlay absolute inset-0 -z-10 opacity-30" />
 
       <div
         className="absolute bottom-0 left-0 top-0 hidden w-px bg-gradient-to-b from-transparent via-red-500/40 to-transparent lg:block"
@@ -160,7 +156,7 @@ export function SectionHero({
       />
 
       <Container>
-        <div className="flex min-h-[520px] items-end py-12 sm:min-h-[590px] sm:py-16 lg:items-center lg:py-20">
+        <div className="flex min-h-[490px] items-end py-10 sm:min-h-[560px] sm:py-14 lg:items-center lg:py-[4.5rem]">
           <HeroCopy title={title} subtitle={subtitle} badge={badge} />
         </div>
       </Container>

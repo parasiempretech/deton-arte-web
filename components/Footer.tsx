@@ -18,7 +18,6 @@ export function Footer() {
   return (
     <footer className="relative mt-auto overflow-hidden border-t border-white/[0.08] bg-[#040405] py-7 sm:py-16 lg:py-20">
       <div className="grain-overlay absolute inset-0 opacity-25" />
-      <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-red-800/[0.07] blur-[130px]" />
       <div className="section-divider absolute inset-x-0 top-0" />
 
       <Container className="relative">
@@ -34,7 +33,7 @@ export function Footer() {
                   src="/logodeton.png"
                   alt=""
                   fill
-                  className="scale-[1.08] object-cover object-top transition-transform duration-300 group-hover:scale-[1.12]"
+                  className="scale-[1.08] object-cover object-top"
                   sizes="64px"
                 />
               </span>
@@ -74,7 +73,6 @@ export function Footer() {
                       href={link.href}
                       className="group inline-flex min-h-7 items-center gap-2 rounded-lg text-xs font-semibold text-white/[0.58] transition-colors hover:text-white sm:min-h-10 sm:text-sm"
                     >
-                      <span className="hidden h-px w-0 bg-red-400 transition-all duration-200 group-hover:w-3 sm:block" />
                       {link.name}
                     </Link>
                   </li>
@@ -100,7 +98,7 @@ export function Footer() {
                     </span>
                   </span>
                   <span
-                    className="text-xs text-white/25 transition-all group-hover:translate-x-1 group-hover:text-red-300 sm:text-base"
+                    className="text-xs text-white/25 transition-colors group-hover:text-red-300 sm:text-base"
                     aria-hidden="true"
                   >
                     →
@@ -120,7 +118,7 @@ export function Footer() {
                     </span>
                   </span>
                   <span
-                    className="hidden shrink-0 text-white/25 transition-all group-hover:translate-x-1 group-hover:text-red-300 sm:inline"
+                    className="hidden shrink-0 text-white/25 transition-colors group-hover:text-red-300 sm:inline"
                     aria-hidden="true"
                   >
                     →
@@ -144,7 +142,7 @@ export function Footer() {
 
         <div className="mt-6 flex flex-col items-start gap-2 border-t border-white/[0.08] pt-4 sm:mt-12 sm:flex-row sm:items-center sm:gap-5 sm:pt-7">
           <div className="min-w-0 text-[10px] uppercase leading-4 tracking-[0.08em] text-white/50 sm:tracking-[0.12em]">
-            © {currentYear} {site.brand} — All Rights Reserved.
+            © {currentYear} {site.brand} — Todos los derechos reservados.
           </div>
 
           <a

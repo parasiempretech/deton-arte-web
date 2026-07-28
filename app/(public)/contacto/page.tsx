@@ -24,8 +24,6 @@ export default function ContactoPage() {
       />
 
       <section className="relative overflow-hidden pb-20 pt-16 sm:pb-24 sm:pt-20 lg:pb-28 lg:pt-20">
-        <div className="absolute -left-44 top-24 h-96 w-96 rounded-full bg-red-800/[0.06] blur-[130px]" />
-
         <Container>
           <header className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
             <div>
@@ -51,14 +49,8 @@ export default function ContactoPage() {
                   href={site.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group surface-panel relative overflow-hidden p-5 transition-all duration-200 hover:-translate-y-1 hover:border-red-300/30 hover:bg-red-500/[0.045] sm:p-6"
+                  className="group surface-panel relative overflow-hidden p-5 transition-colors duration-200 hover:border-red-300/30 hover:bg-red-500/[0.045] sm:p-6"
                 >
-                  <span
-                    className="absolute right-4 top-2 font-[family-name:var(--font-display)] text-6xl font-semibold italic tracking-[-0.04em] text-white/[0.035]"
-                    aria-hidden="true"
-                  >
-                    WA
-                  </span>
                   <span className="font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.14em] text-red-300">
                     WhatsApp
                   </span>
@@ -66,7 +58,7 @@ export default function ContactoPage() {
                     {site.phone}
                   </span>
                   <span
-                    className="mt-4 inline-flex text-sm text-white/35 transition-transform group-hover:translate-x-1 group-hover:text-red-300"
+                    className="mt-4 inline-flex text-sm text-white/35 transition-colors group-hover:text-red-300"
                     aria-hidden="true"
                   >
                     →
@@ -75,14 +67,8 @@ export default function ContactoPage() {
 
                 <a
                   href={site.emailUrl}
-                  className="group surface-panel relative min-w-0 overflow-hidden p-5 transition-all duration-200 hover:-translate-y-1 hover:border-red-300/30 hover:bg-red-500/[0.045] sm:p-6"
+                  className="group surface-panel relative min-w-0 overflow-hidden p-5 transition-colors duration-200 hover:border-red-300/30 hover:bg-red-500/[0.045] sm:p-6"
                 >
-                  <span
-                    className="absolute right-4 top-2 font-[family-name:var(--font-display)] text-6xl font-semibold italic tracking-[-0.04em] text-white/[0.035]"
-                    aria-hidden="true"
-                  >
-                    @
-                  </span>
                   <span className="font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.14em] text-red-300">
                     Email
                   </span>
@@ -90,7 +76,7 @@ export default function ContactoPage() {
                     {site.email}
                   </span>
                   <span
-                    className="mt-4 inline-flex text-sm text-white/35 transition-transform group-hover:translate-x-1 group-hover:text-red-300"
+                    className="mt-4 inline-flex text-sm text-white/35 transition-colors group-hover:text-red-300"
                     aria-hidden="true"
                   >
                     →
@@ -98,12 +84,6 @@ export default function ContactoPage() {
                 </a>
 
                 <div className="surface-panel relative overflow-hidden p-5 sm:col-span-2 sm:p-6">
-                  <span
-                    className="absolute right-4 top-2 font-[family-name:var(--font-display)] text-6xl font-semibold italic tracking-[-0.04em] text-white/[0.035]"
-                    aria-hidden="true"
-                  >
-                    10—19
-                  </span>
                   <span className="font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.14em] text-red-300">
                     Horario
                   </span>
@@ -180,14 +160,14 @@ export default function ContactoPage() {
 
             <aside className="lg:sticky lg:top-28">
               <div className="group relative">
-                <div className="absolute left-[12%] top-[8%] h-[60%] w-[76%] rounded-full bg-red-700/[0.1] blur-[75px]" />
+                <div className="absolute left-[12%] top-[8%] h-[60%] w-[76%] rounded-full bg-red-700/[0.05] blur-[75px]" />
                 <figure className="relative">
                   <Image
                     src="/covers/contacto.jpg"
                     alt="Deton AR73"
                     width={1153}
                     height={1612}
-                    className="h-auto w-full drop-shadow-[0_34px_44px_rgba(0,0,0,0.48)] transition-transform duration-700 ease-out group-hover:-translate-y-1 group-hover:scale-[1.006]"
+                    className="h-auto w-full drop-shadow-[0_28px_40px_rgba(0,0,0,0.44)]"
                     sizes="(max-width: 1024px) 100vw, 520px"
                   />
                   <figcaption className="mt-4 flex items-center gap-3">

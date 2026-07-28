@@ -44,18 +44,10 @@ export function Conditions() {
   return (
     <section className="relative overflow-hidden py-20 sm:py-28 lg:py-32">
       <div className="section-divider absolute inset-x-0 top-0" />
-      <div className="absolute -right-48 top-16 h-96 w-96 rounded-full bg-red-700/[0.065] blur-[130px]" />
 
       <Container>
         <div className="surface-card relative isolate overflow-hidden p-6 sm:p-10 lg:p-14">
-          <div className="grain-overlay absolute inset-0 -z-10 opacity-35" />
-          <div className="absolute -right-24 -top-24 -z-10 h-72 w-72 rounded-full bg-red-600/[0.1] blur-[90px]" />
-          <div
-            aria-hidden="true"
-            className="absolute right-6 top-4 -z-10 font-[family-name:var(--font-display)] text-[8rem] font-semibold italic leading-none tracking-[-0.045em] text-white/[0.025] sm:right-10 sm:top-0 sm:text-[13rem]"
-          >
-            04
-          </div>
+          <div className="grain-overlay absolute inset-0 -z-10 opacity-20" />
 
           <header className="relative grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
             <div>

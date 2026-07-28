@@ -35,13 +35,13 @@ function NavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={[
-        "group relative flex items-center font-[family-name:var(--font-body)] font-medium tracking-[-0.01em] transition-all duration-200",
+        "group relative flex items-center font-[family-name:var(--font-body)] font-medium tracking-[-0.01em] transition-colors duration-200",
         mobile
           ? "min-h-[3.65rem] justify-between overflow-hidden rounded-2xl border px-4 py-3 text-base"
           : "min-h-11 rounded-xl px-3 py-2 text-[12px] xl:px-3.5 xl:text-[13px]",
         active
           ? mobile
-            ? "border-red-400/35 bg-[linear-gradient(100deg,rgba(194,18,31,0.34),rgba(240,47,60,0.12))] text-white shadow-[0_14px_40px_-25px_rgba(240,47,60,0.75)]"
+            ? "border-red-400/35 bg-red-500/[0.12] text-white"
             : "text-white"
           : mobile
             ? "border-white/[0.08] bg-[#111113] text-white/[0.68] hover:border-white/[0.16] hover:bg-[#171719] hover:text-white"
@@ -66,7 +66,7 @@ function NavLink({
         <span
           aria-hidden="true"
           className={[
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-base transition-all duration-200 group-hover:translate-x-0.5",
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-base transition-colors duration-200",
             active
               ? "border-red-300/25 bg-red-500 text-white"
               : "border-white/[0.08] bg-white/[0.025] text-white/30 group-hover:border-white/15 group-hover:text-white",
@@ -170,7 +170,7 @@ export function Nav() {
   return (
     <header
       className={[
-        "sticky top-0 z-50 border-b border-white/[0.08] shadow-[0_14px_45px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-colors duration-200",
+        "sticky top-0 z-50 border-b border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition-colors duration-200",
         open ? "bg-[#08080a]" : "bg-[#08080a]/[0.88]",
       ].join(" ")}
     >
@@ -183,7 +183,7 @@ export function Nav() {
             className="group flex min-w-0 items-center gap-2.5 rounded-xl text-white sm:gap-3"
             aria-label="Ir al inicio"
           >
-            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-white/[0.12] bg-[#f5d9cd] shadow-[0_8px_24px_-10px_rgba(0,0,0,0.8)] transition-transform duration-300 group-hover:-rotate-2 group-hover:scale-[1.04] sm:h-12 sm:w-12">
+            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-white/[0.12] bg-[#f5d9cd] transition-colors duration-200 group-hover:border-white/25 sm:h-12 sm:w-12">
               <Image
                 src="/logodeton.png"
                 alt="Logo DetonAR73"
@@ -217,10 +217,10 @@ export function Nav() {
             href={site.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden min-h-11 items-center justify-center gap-2 rounded-xl border border-red-400/25 bg-red-500/[0.1] px-4 font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.1em] text-white transition-all hover:-translate-y-0.5 hover:border-red-300/40 hover:bg-red-600 xl:inline-flex"
+            className="hidden min-h-11 items-center justify-center gap-2 rounded-xl border border-red-400/25 bg-red-500/[0.1] px-4 font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-red-300/40 hover:bg-red-600 xl:inline-flex"
           >
             <span
-              className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.85)]"
+              className="h-1.5 w-1.5 rounded-full bg-red-400"
               aria-hidden="true"
             />
             WhatsApp
@@ -230,7 +230,7 @@ export function Nav() {
             ref={menuButtonRef}
             type="button"
             onClick={() => setOpen((value) => !value)}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white transition-all hover:border-white/20 hover:bg-white/[0.09] active:scale-95 lg:hidden"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white transition-colors hover:border-white/20 hover:bg-white/[0.09] active:bg-white/[0.12] lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-navigation"
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
@@ -267,14 +267,13 @@ export function Nav() {
         aria-label="Navegación principal"
         aria-hidden={!open}
         className={[
-          "absolute inset-x-0 top-full h-[calc(100dvh-72px)] overflow-hidden border-t border-white/[0.07] bg-[#08080a] shadow-[0_30px_80px_-24px_rgba(0,0,0,1)] transition-all duration-300 sm:h-[calc(100dvh-80px)] lg:hidden",
+          "absolute inset-x-0 top-full h-[calc(100dvh-72px)] overflow-hidden border-t border-white/[0.07] bg-[#08080a] shadow-[0_24px_60px_-28px_rgba(0,0,0,0.95)] transition-[opacity,transform,visibility] duration-300 sm:h-[calc(100dvh-80px)] lg:hidden",
           open
             ? "visible translate-y-0 opacity-100"
             : "invisible -translate-y-2 opacity-0",
         ].join(" ")}
       >
-        <div className="grain-overlay pointer-events-none absolute inset-0 opacity-25" />
-        <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-red-700/[0.09] blur-[100px]" />
+        <div className="grain-overlay pointer-events-none absolute inset-0 opacity-15" />
 
         <Container className="relative h-full">
           <div className="flex h-full min-h-0 flex-col">
@@ -287,7 +286,7 @@ export function Nav() {
 
             <nav
               className="grid min-h-0 flex-1 auto-rows-min gap-2 overflow-y-auto overscroll-contain pb-4 sm:grid-cols-2 sm:content-start"
-              aria-label="Navegación mobile"
+              aria-label="Navegación móvil"
             >
               {links.map((link, index) => (
                 <NavLink

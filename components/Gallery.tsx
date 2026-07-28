@@ -92,7 +92,7 @@ export function Gallery({
     activeItem && activeIndex !== null && typeof document !== "undefined"
       ? createPortal(
           <div
-            className="fixed inset-0 z-[200] bg-[#030304]/[0.98] backdrop-blur-xl"
+            className="fixed inset-0 z-[200] bg-[#030304]/[0.98] backdrop-blur-md"
             role="dialog"
             aria-modal="true"
             aria-labelledby={dialogTitleId}
@@ -177,7 +177,7 @@ export function Gallery({
                     onLoad={() => setImageStatus("loaded")}
                     onError={() => setImageStatus("error")}
                     className={[
-                      "h-auto max-h-full w-auto max-w-full object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.72)] transition-opacity duration-200",
+                      "h-auto max-h-full w-auto max-w-full object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.66)] transition-opacity duration-200",
                       imageStatus === "loaded" ? "opacity-100" : "opacity-0",
                     ].join(" ")}
                     sizes="100vw"
@@ -214,47 +214,53 @@ export function Gallery({
   return (
     <>
       <section className="relative overflow-hidden py-14 sm:py-20 lg:py-24">
-        <div className="absolute -right-48 top-24 h-80 w-80 rounded-full bg-red-800/[0.045] blur-[120px]" />
-
         <Container>
           <header className="flex items-end justify-between gap-6">
             <h2 className="section-title">{title}</h2>
             <div className="mb-1 shrink-0 font-[family-name:var(--font-body)] text-[11px] font-medium uppercase tracking-[0.13em] text-white/60">
-              {items.length} obras
+              {items.length} {items.length === 1 ? "obra" : "obras"}
             </div>
           </header>
 
-          <div className="mt-8 columns-2 gap-2.5 sm:mt-10 sm:gap-4 lg:columns-3 xl:columns-4">
-            {items.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={(event) => {
-                  triggerRef.current = event.currentTarget;
-                  setRetryVersion(0);
-                  setImageStatus("loading");
-                  setActiveIndex(index);
-                }}
-                aria-haspopup="dialog"
-                aria-label={`Ampliar obra ${index + 1} de ${items.length}`}
-                className="group relative mb-2.5 block w-full break-inside-avoid cursor-zoom-in overflow-hidden text-left transition-[filter,transform] duration-300 hover:-translate-y-0.5 hover:brightness-[1.04] focus-visible:z-10 sm:mb-4"
-                style={{ aspectRatio: `${item.width} / ${item.height}` }}
-              >
-                <Image
-                  src={item.src}
-                  alt=""
-                  fill
-                  aria-hidden="true"
-                  className="object-contain transition-transform duration-500 group-hover:scale-[1.008]"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1280px) 34vw, 25vw"
-                />
-                <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/[0.08]" />
-                <span className="pointer-events-none absolute bottom-3 right-3 translate-y-1 text-xl font-light text-white opacity-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-90 group-focus-visible:translate-y-0 group-focus-visible:opacity-90">
-                  +
-                </span>
-              </button>
-            ))}
-          </div>
+          {items.length ? (
+            <div className="mt-8 columns-2 gap-2.5 sm:mt-10 sm:gap-4 lg:columns-3 xl:columns-4">
+              {items.map((item, index) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={(event) => {
+                    triggerRef.current = event.currentTarget;
+                    setRetryVersion(0);
+                    setImageStatus("loading");
+                    setActiveIndex(index);
+                  }}
+                  aria-haspopup="dialog"
+                  aria-label={`Ampliar obra ${index + 1} de ${items.length}`}
+                  className="group relative mb-2.5 block w-full break-inside-avoid cursor-zoom-in overflow-hidden text-left transition-[filter] duration-200 hover:brightness-[1.04] focus-visible:z-10 sm:mb-4"
+                  style={{ aspectRatio: `${item.width} / ${item.height}` }}
+                >
+                  <Image
+                    src={item.src}
+                    alt=""
+                    fill
+                    aria-hidden="true"
+                    className="object-contain"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1280px) 34vw, 25vw"
+                  />
+                  <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/[0.08]" />
+                  <span className="pointer-events-none absolute bottom-3 right-3 text-xl font-light text-white opacity-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] transition-opacity duration-200 group-hover:opacity-90 group-focus-visible:opacity-90">
+                    +
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 border-y border-white/[0.09] py-14 text-center sm:mt-10 sm:py-[4.5rem]">
+              <p className="font-[family-name:var(--font-display)] text-2xl text-white/55">
+                Todavía no hay obras publicadas.
+              </p>
+            </div>
+          )}
         </Container>
       </section>
 

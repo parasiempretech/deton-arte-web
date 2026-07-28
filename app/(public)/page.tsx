@@ -49,7 +49,7 @@ function ProcessStep({
 }) {
   return (
     <article className="group relative p-6 sm:p-8 lg:px-7">
-      <div className="absolute inset-0 rounded-[1.5rem] border border-white/[0.08] bg-white/[0.018] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-red-400/25 group-hover:bg-red-500/[0.035]" />
+      <div className="absolute inset-0 rounded-[1.25rem] border border-white/[0.08] bg-white/[0.018] transition-colors duration-200 group-hover:border-red-400/25 group-hover:bg-red-500/[0.035]" />
       <div className="relative">
         <div className="flex items-center justify-between gap-4">
           <span className="font-[family-name:var(--font-display)] text-5xl font-semibold italic leading-none tracking-[-0.035em] text-white/[0.12] transition-colors group-hover:text-red-400/30">
@@ -74,8 +74,7 @@ function ProcessStep({
 function HeroArtwork() {
   return (
     <div className="relative mx-auto w-full max-w-[620px] lg:max-w-none">
-      <div className="absolute left-[5%] top-[9%] h-[68%] w-[72%] rounded-full bg-red-600/[0.14] blur-[100px]" />
-      <div className="absolute bottom-[8%] right-[2%] h-[38%] w-[38%] rounded-full bg-amber-200/[0.06] blur-[70px]" />
+      <div className="absolute left-[5%] top-[9%] h-[68%] w-[72%] rounded-full bg-red-600/[0.07] blur-[100px]" />
 
       <div className="relative aspect-square">
         <figure className="group absolute left-[3%] top-[1%] z-10 w-[74%]">
@@ -85,18 +84,18 @@ function HeroArtwork() {
             width={3120}
             height={3898}
             priority
-            className="h-auto w-full drop-shadow-[0_34px_42px_rgba(0,0,0,0.46)] transition-transform duration-700 ease-out group-hover:-translate-y-1 group-hover:scale-[1.008]"
+            className="h-auto w-full drop-shadow-[0_28px_38px_rgba(0,0,0,0.42)]"
             sizes="(max-width: 1024px) 74vw, 500px"
           />
         </figure>
 
-        <figure className="art-drift group absolute bottom-[5%] right-[1%] z-20 w-[36%]">
+        <figure className="group absolute bottom-[5%] right-[1%] z-20 w-[36%]">
           <Image
             src="/galeria/mascotas/mascota-05.webp"
             alt="Retrato de mascota realizado por Deton Arte"
             width={1440}
             height={1800}
-            className="h-auto w-full drop-shadow-[0_28px_38px_rgba(0,0,0,0.62)] transition-transform duration-700 ease-out group-hover:scale-[1.012]"
+            className="h-auto w-full drop-shadow-[0_24px_34px_rgba(0,0,0,0.56)]"
             sizes="(max-width: 1024px) 36vw, 250px"
           />
         </figure>
@@ -129,18 +128,18 @@ export default function HomePage() {
             alt=""
             fill
             sizes="100vw"
-            className="scale-110 object-cover opacity-[0.075] blur-2xl"
+            className="scale-110 object-cover opacity-[0.055] blur-2xl"
           />
         </div>
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_72%_38%,rgba(240,47,60,0.12),transparent_30rem),linear-gradient(105deg,rgba(4,4,5,0.99)_5%,rgba(6,6,7,0.94)_52%,rgba(6,6,7,0.72)_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(105deg,rgba(4,4,5,0.99)_5%,rgba(6,6,7,0.95)_54%,rgba(6,6,7,0.76)_100%)]" />
         <div className="grain-overlay absolute inset-0 -z-10 opacity-45" />
 
         <Container className="max-w-[1440px]">
-          <div className="grid min-h-[calc(100dvh-72px)] items-center gap-12 py-14 sm:min-h-[720px] sm:py-20 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8 xl:gap-16">
+          <div className="grid items-center gap-8 py-10 sm:gap-10 sm:py-16 lg:min-h-[calc(100dvh-80px)] lg:grid-cols-[0.95fr_1.05fr] lg:gap-8 lg:py-[4.5rem] xl:gap-16">
             <div className="relative z-10 max-w-2xl">
               <div className="eyebrow">@{site.handle}</div>
 
-              <h1 className="mt-6 max-w-[12ch] text-balance font-[family-name:var(--font-display)] text-[clamp(3.05rem,6.7vw,5.9rem)] font-semibold leading-[0.91] tracking-[-0.038em] text-white [text-shadow:0_20px_60px_rgba(0,0,0,.5)]">
+              <h1 className="mt-6 max-w-[12ch] text-balance font-[family-name:var(--font-display)] text-[clamp(2.85rem,6.7vw,5.9rem)] font-semibold leading-[0.91] tracking-[-0.038em] text-white [text-shadow:0_16px_46px_rgba(0,0,0,.45)]">
                 “Que en tu risa <br /> viva el{" "}
                 <span className="brush-mark not-italic">arte</span>” 🎨
               </h1>
@@ -148,7 +147,7 @@ export default function HomePage() {
               <ul className="mt-8 flex flex-wrap gap-2.5 text-xs font-bold text-white/[0.72] sm:text-sm">
                 <li className="surface-panel flex min-h-10 items-center gap-2.5 px-3.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                  <span>Muralista & Arte Público</span>
+                  <span>Muralista y arte público</span>
                 </li>
                 <li className="surface-panel flex min-h-10 items-center gap-2.5 px-3.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-200" />
@@ -206,7 +205,7 @@ export default function HomePage() {
         <Container>
           <SectionHeader eyebrow="Obras" title="Categorías" />
 
-          <div className="mt-8 grid grid-cols-6 items-start gap-x-3 gap-y-7 sm:mt-10 sm:gap-x-5 sm:gap-y-9 lg:grid-cols-5">
+          <div className="mt-8 grid grid-cols-6 items-start gap-x-2 gap-y-7 sm:mt-10 sm:gap-x-5 sm:gap-y-9 lg:grid-cols-5">
             {categories.map((category, index) => (
               <Link
                 key={category.key}
@@ -223,7 +222,7 @@ export default function HomePage() {
                       alt=""
                       width={categoryCovers[category.key].width}
                       height={categoryCovers[category.key].height}
-                      className="h-auto max-h-full w-auto max-w-full transition-[filter,transform] duration-500 ease-out group-hover:scale-[1.018] group-hover:brightness-[1.06]"
+                      className="h-auto max-h-full w-auto max-w-full transition-[filter] duration-200 group-hover:brightness-[1.06]"
                       sizes="(max-width: 1023px) 30vw, 20vw"
                     />
                   </div>
@@ -245,10 +244,7 @@ export default function HomePage() {
                     </p>
                     <span className="mt-2 hidden items-center gap-2 font-[family-name:var(--font-body)] text-[10px] font-semibold uppercase tracking-[0.15em] text-red-300 lg:inline-flex">
                       <span>{category.cta}</span>
-                      <span
-                        className="transition-transform duration-200 group-hover:translate-x-1"
-                        aria-hidden="true"
-                      >
+                      <span aria-hidden="true">
                         →
                       </span>
                     </span>
@@ -260,8 +256,7 @@ export default function HomePage() {
         </Container>
       </section>
 
-      <section className="relative overflow-hidden border-y border-white/[0.07] bg-black/25 py-20 sm:py-28 lg:py-32">
-        <div className="absolute -left-40 top-12 h-80 w-80 rounded-full bg-red-700/[0.075] blur-[110px]" />
+      <section className="relative overflow-hidden border-y border-white/[0.07] bg-black/25 py-16 sm:py-24 lg:py-28">
         <div className="grain-overlay absolute inset-0 opacity-25" />
 
         <Container>

@@ -70,6 +70,7 @@ export function AdminPanel({
   const [items, setItems] = useState(initialItems);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [progress, setProgress] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(loadError ?? "");
@@ -173,6 +174,14 @@ export function AdminPanel({
       return;
     }
 
+    if (selectedFiles.length > 20) {
+      setFiles(selectedFiles.slice(0, 20));
+      setError(
+        "Podés publicar hasta 20 fotos por vez. Seleccionamos las primeras 20.",
+      );
+      return;
+    }
+
     setFiles(selectedFiles.slice(0, 20));
   }
 
@@ -183,6 +192,7 @@ export function AdminPanel({
   function handleDrop(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault();
     setDragging(false);
+    if (uploading || storageMode === "unavailable") return;
     selectFiles(Array.from(event.dataTransfer.files));
   }
 
@@ -327,12 +337,29 @@ export function AdminPanel({
   }
 
   async function logout() {
-    await fetch("/api/panel/session", {
-      headers: { "x-csrf-token": csrfToken },
-      method: "DELETE",
-    });
-    router.replace("/panel/login");
-    router.refresh();
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+    setError("");
+    try {
+      const response = await fetch("/api/panel/session", {
+        headers: { "x-csrf-token": csrfToken },
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("No se pudo cerrar la sesión.");
+      }
+      router.replace("/panel/login");
+      router.refresh();
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "No se pudo cerrar la sesión.",
+      );
+    } finally {
+      setLoggingOut(false);
+    }
   }
 
   return (
@@ -352,7 +379,7 @@ export function AdminPanel({
               height={42}
               className="h-10 w-10 object-cover object-top"
             />
-            <span className="font-[family-name:var(--font-display)] text-xl font-semibold leading-none">
+            <span className="hidden font-[family-name:var(--font-display)] text-xl font-semibold leading-none min-[360px]:inline">
               Deton Arte
             </span>
           </button>
@@ -369,9 +396,10 @@ export function AdminPanel({
             <button
               type="button"
               onClick={logout}
-              className="min-h-10 px-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/50 transition hover:text-white sm:text-[11px]"
+              disabled={loggingOut}
+              className="min-h-10 px-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/50 transition-colors hover:text-white disabled:cursor-wait disabled:opacity-50 sm:text-[11px]"
             >
-              Salir
+              {loggingOut ? "Saliendo…" : "Salir"}
             </button>
           </div>
         </div>
@@ -399,22 +427,27 @@ export function AdminPanel({
               </div>
             )}
 
-            <div className="mt-9 grid overflow-hidden rounded-2xl border border-white/[0.12] sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.1] sm:mt-9 lg:grid-cols-3">
               {categoryKeys.map((key, index) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => openCategory(key)}
-                  className="group relative flex min-h-56 flex-col items-start justify-between border-b border-white/[0.1] bg-white/[0.018] p-6 text-left transition hover:bg-red-500/[0.07] sm:border-r lg:min-h-64 lg:p-8"
+                  className={[
+                    "group relative flex min-h-40 flex-col items-start justify-between bg-[#0b0b0d] p-4 text-left transition-colors hover:bg-[#161012] focus-visible:bg-[#161012] sm:min-h-52 sm:p-6 lg:min-h-56 lg:p-7",
+                    index === categoryKeys.length - 1
+                      ? "col-span-2 lg:col-span-1"
+                      : "",
+                  ].join(" ")}
                 >
                   <span className="text-[10px] font-semibold tracking-[0.16em] text-red-300/65">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <span>
-                    <span className="block font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3.1rem)] font-semibold leading-[0.9] tracking-[-0.03em]">
+                    <span className="block font-[family-name:var(--font-display)] text-[clamp(1.55rem,6vw,3rem)] font-semibold leading-[0.92] tracking-[-0.03em]">
                       {categoryLabels[key]}
                     </span>
-                    <span className="mt-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.1em] text-white/45 transition group-hover:text-white">
+                    <span className="mt-4 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.09em] text-white/45 transition-colors group-hover:text-white sm:mt-5 sm:gap-3 sm:text-xs">
                       {counts[key]} {counts[key] === 1 ? "foto" : "fotos"}
                       <span aria-hidden="true">→</span>
                     </span>
@@ -459,7 +492,7 @@ export function AdminPanel({
                   type="file"
                   accept="image/*,.heic,.heif,.tif,.tiff,.avif,.bmp,.svg"
                   multiple
-                  disabled={uploading}
+                  disabled={uploading || storageMode === "unavailable"}
                   className="peer sr-only"
                   onChange={handleFileChange}
                 />
@@ -469,11 +502,14 @@ export function AdminPanel({
                   onDragLeave={() => setDragging(false)}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={handleDrop}
+                  aria-disabled={uploading || storageMode === "unavailable"}
                   className={[
-                    "mt-5 flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-5 text-center transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-amber-200",
-                    dragging
+                    "mt-5 flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed px-5 text-center transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-amber-200 sm:min-h-40",
+                    storageMode === "unavailable"
+                      ? "cursor-not-allowed border-white/[0.1] bg-black/20 opacity-45"
+                      : dragging
                       ? "border-red-300/70 bg-red-500/[0.08]"
-                      : "border-white/[0.18] bg-black/20 hover:border-red-300/40",
+                      : "cursor-pointer border-white/[0.18] bg-black/20 hover:border-red-300/40",
                   ].join(" ")}
                 >
                   <span className="font-[family-name:var(--font-display)] text-xl font-semibold">
@@ -521,7 +557,7 @@ export function AdminPanel({
 
                 {storageMode === "unavailable" && (
                   <p className="mt-3 text-xs text-red-300/80" role="alert">
-                    La carga de fotos no está disponible.
+                    La administración de fotos no está disponible.
                   </p>
                 )}
 
@@ -581,7 +617,7 @@ export function AdminPanel({
                               deleteTriggerRef.current = event.currentTarget;
                               setDeleteTarget(item);
                             }}
-                            className="min-h-10 px-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/45 transition hover:text-red-200 focus-visible:text-red-200 disabled:cursor-not-allowed disabled:opacity-30"
+                            className="min-h-11 px-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/45 transition-colors hover:text-red-200 focus-visible:text-red-200 disabled:cursor-not-allowed disabled:opacity-30"
                           >
                             Eliminar
                           </button>
@@ -590,7 +626,7 @@ export function AdminPanel({
                     ))}
                   </div>
                 ) : (
-                  <div className="flex min-h-64 items-center justify-center rounded-2xl border border-dashed border-white/[0.12] text-center">
+                  <div className="flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-white/[0.12] px-5 text-center sm:min-h-64">
                     <p className="font-[family-name:var(--font-display)] text-2xl font-semibold text-white/50">
                       No hay fotos publicadas
                     </p>
@@ -658,7 +694,7 @@ export function AdminPanel({
                 type="button"
                 onClick={confirmDelete}
                 disabled={deleting}
-                className="primary-action flex-1"
+                className="danger-action flex-1"
               >
                 {deleting ? "Eliminando…" : "Eliminar"}
               </button>

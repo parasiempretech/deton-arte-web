@@ -18,14 +18,13 @@ export default function PublicLayout({
 
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-[#070708]" />
-        <div className="absolute -left-48 -top-52 h-[38rem] w-[38rem] rounded-full bg-red-700/[0.085] blur-[130px]" />
-        <div className="absolute -right-64 top-[30%] h-[34rem] w-[34rem] rounded-full bg-[#f3b5a6]/[0.035] blur-[140px]" />
-        <div className="grain-overlay absolute inset-0 opacity-45 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+        <div className="absolute -left-48 -top-52 h-[38rem] w-[38rem] rounded-full bg-red-700/[0.05] blur-[130px]" />
+        <div className="grain-overlay absolute inset-0 opacity-30 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
       </div>
 
       <div className="flex min-h-dvh flex-col">
         <Nav />
-        <main id="main-content" className="page-enter flex-1">
+        <main id="main-content" tabIndex={-1} className="page-enter flex-1">
           {children}
         </main>
         <Footer />
