@@ -7,6 +7,22 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 2592000,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/covers/cuadros.png",
+        destination: "/covers/cuadros.webp",
+      },
+      {
+        source: "/covers/cositas.png",
+        destination: "/covers/cositas.webp",
+      },
+      {
+        source: "/covers/home.png",
+        destination: "/galeria/murales/mural-05.jpg",
+      },
+    ];
+  },
   async headers() {
     return [
       {
