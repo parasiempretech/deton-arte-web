@@ -17,6 +17,39 @@ const MAX_LOGIN_BODY_BYTES = 4096;
 const MAX_PASSWORD_LENGTH = 512;
 const attempts = new Map<string, { count: number; resetAt: number }>();
 
+class RequestBodyTooLargeError extends Error {}
+
+async function readLimitedJsonBody(request: Request) {
+  if (!request.body) throw new SyntaxError("Missing request body");
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    totalBytes += value.byteLength;
+    if (totalBytes > MAX_LOGIN_BODY_BYTES) {
+      await reader.cancel().catch(() => undefined);
+      throw new RequestBodyTooLargeError();
+    }
+    chunks.push(value);
+  }
+
+  const body = new Uint8Array(totalBytes);
+  let offset = 0;
+  chunks.forEach((chunk) => {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  });
+
+  return JSON.parse(
+    new TextDecoder("utf-8", { fatal: true }).decode(body),
+  ) as unknown;
+}
+
 function getClientKey(request: Request) {
   const key =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -58,10 +91,12 @@ export async function POST(request: Request) {
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (
     !Number.isFinite(contentLength) ||
-    contentLength < 0 ||
-    contentLength > MAX_LOGIN_BODY_BYTES
+    contentLength < 0
   ) {
     return noStoreJson({ error: "Solicitud inválida." }, 400);
+  }
+  if (contentLength > MAX_LOGIN_BODY_BYTES) {
+    return noStoreJson({ error: "Solicitud demasiado grande." }, 413);
   }
 
   const key = getClientKey(request);
@@ -82,13 +117,18 @@ export async function POST(request: Request) {
 
   let password = "";
   try {
-    const body = (await request.json()) as { password?: unknown };
+    const body = (await readLimitedJsonBody(request)) as {
+      password?: unknown;
+    };
     password =
       typeof body.password === "string" &&
       body.password.length <= MAX_PASSWORD_LENGTH
         ? body.password
         : "";
-  } catch {
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) {
+      return noStoreJson({ error: "Solicitud demasiado grande." }, 413);
+    }
     return noStoreJson({ error: "Solicitud inválida." }, 400);
   }
 

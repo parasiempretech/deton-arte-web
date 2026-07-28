@@ -17,7 +17,7 @@ export async function GET(
 
   return new Response(new Uint8Array(image), {
     headers: {
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=0, must-revalidate",
       "Content-Type": "image/webp",
       "X-Content-Type-Options": "nosniff",
     },
