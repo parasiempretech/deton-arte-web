@@ -1,36 +1,90 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Ref } from "react";
 import { categories, site } from "@/lib/site";
 import { Container } from "./Container";
+
+type NavLinkProps = {
+  href: string;
+  label: string;
+  mobile?: boolean;
+  index?: number;
+  onNavigate?: () => void;
+  linkRef?: Ref<HTMLAnchorElement>;
+};
 
 function NavLink({
   href,
   label,
+  mobile = false,
+  index,
   onNavigate,
-}: {
-  href: string;
-  label: string;
-  onNavigate?: () => void;
-}) {
+  linkRef,
+}: NavLinkProps) {
   const pathname = usePathname();
   const active = pathname === href;
 
   return (
     <Link
+      ref={linkRef}
       href={href}
       onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
       className={[
-        "rounded-lg px-4 py-2 text-sm font-bold transition-all duration-200",
+        "group relative flex items-center font-[family-name:var(--font-body)] font-medium tracking-[-0.01em] transition-all duration-200",
+        mobile
+          ? "min-h-[3.65rem] justify-between overflow-hidden rounded-2xl border px-4 py-3 text-base"
+          : "min-h-11 rounded-xl px-3 py-2 text-[12px] xl:px-3.5 xl:text-[13px]",
         active
-          ? "bg-red-600 text-white shadow-lg shadow-red-600/40"
-          : "text-gray-400 hover:bg-white/5 hover:text-white",
+          ? mobile
+            ? "border-red-400/35 bg-[linear-gradient(100deg,rgba(194,18,31,0.34),rgba(240,47,60,0.12))] text-white shadow-[0_14px_40px_-25px_rgba(240,47,60,0.75)]"
+            : "text-white"
+          : mobile
+            ? "border-white/[0.08] bg-[#111113] text-white/[0.68] hover:border-white/[0.16] hover:bg-[#171719] hover:text-white"
+            : "text-white/[0.58] hover:bg-white/[0.045] hover:text-white",
       ].join(" ")}
     >
-      {label}
+      <span className={mobile ? "flex min-w-0 items-center gap-3.5" : ""}>
+        {mobile && index !== undefined && (
+          <span
+            className={[
+              "w-5 shrink-0 text-[10px] font-semibold tracking-[0.1em]",
+              active ? "text-red-200/75" : "text-white/25",
+            ].join(" ")}
+            aria-hidden="true"
+          >
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        )}
+        <span className={mobile ? "truncate text-[1.05rem]" : ""}>{label}</span>
+      </span>
+      {mobile ? (
+        <span
+          aria-hidden="true"
+          className={[
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-base transition-all duration-200 group-hover:translate-x-0.5",
+            active
+              ? "border-red-300/25 bg-red-500 text-white"
+              : "border-white/[0.08] bg-white/[0.025] text-white/30 group-hover:border-white/15 group-hover:text-white",
+          ].join(" ")}
+        >
+          →
+        </span>
+      ) : (
+        <span
+          aria-hidden="true"
+          className={[
+            "absolute inset-x-3 bottom-1 h-px origin-left bg-gradient-to-r from-red-500 to-amber-200 transition-transform duration-200",
+            active
+              ? "scale-x-100"
+              : "scale-x-0 group-hover:scale-x-100",
+          ].join(" ")}
+        />
+      )}
     </Link>
   );
 }
@@ -38,11 +92,17 @@ function NavLink({
 export function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
 
   const links = useMemo(
     () => [
       { href: "/", label: "Inicio" },
-      ...categories.map((c) => ({ href: c.href, label: c.title })),
+      ...categories.map((category) => ({
+        href: category.href,
+        label: category.title,
+      })),
       { href: "/contacto", label: "Contacto" },
     ],
     []
@@ -52,87 +112,224 @@ export function Nav() {
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && open) {
+        setOpen(false);
+        menuButtonRef.current?.focus();
+      }
+
+      if (event.key === "Tab" && open) {
+        const focusableElements =
+          menuPanelRef.current?.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled])'
+          );
+        if (!focusableElements?.length) return;
+
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      if (desktopQuery.matches) setOpen(false);
+    };
+
+    desktopQuery.addEventListener("change", closeOnDesktop);
+    return () => desktopQuery.removeEventListener("change", closeOnDesktop);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.body.dataset.menuOpen = "true";
+    window.requestAnimationFrame(() => firstMobileLinkRef.current?.focus());
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      delete document.body.dataset.menuOpen;
+    };
+  }, [open]);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-gray-950/95 backdrop-blur-md">
-      <Container>
-        <div className="flex items-center justify-between py-3 sm:py-4">
+    <header
+      className={[
+        "sticky top-0 z-50 border-b border-white/[0.08] shadow-[0_14px_45px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-colors duration-200",
+        open ? "bg-[#08080a]" : "bg-[#08080a]/[0.88]",
+      ].join(" ")}
+    >
+      <div className="h-[3px] bg-gradient-to-r from-red-700 via-red-500 to-amber-200/70" />
+
+      <Container className="max-w-[1440px]">
+        <div className="flex h-[69px] items-center justify-between gap-4 sm:h-[77px]">
           <Link
             href="/"
-            className="group flex items-center gap-3"
+            className="group flex min-w-0 items-center gap-2.5 rounded-xl text-white sm:gap-3"
             aria-label="Ir al inicio"
           >
-            {/* El Oso: Grande y completo */}
-            <div className="relative h-20 w-20 sm:h-28 sm:w-28 transition-transform duration-300 group-hover:scale-105">
+            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-white/[0.12] bg-[#f5d9cd] shadow-[0_8px_24px_-10px_rgba(0,0,0,0.8)] transition-transform duration-300 group-hover:-rotate-2 group-hover:scale-[1.04] sm:h-12 sm:w-12">
               <Image
                 src="/logodeton.png"
                 alt="Logo DetonAR73"
                 fill
-                className="object-contain"
+                className="scale-[1.08] object-cover object-top"
                 priority
+                sizes="48px"
               />
-            </div>
+            </span>
 
-            {/* Texto DetonAR73 */}
-            <div className="flex flex-col">
-              <span className="text-2xl font-black italic tracking-tighter text-white sm:text-3xl">
-                Deton<span className="text-red-600">AR73</span>
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate font-[family-name:var(--font-display)] text-[1.35rem] font-semibold italic leading-none tracking-[-0.04em] text-white sm:text-[1.55rem]">
+                Deton<span className="text-red-500">AR73</span>
               </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold -mt-1 ml-1">
+              <span className="mt-1 truncate font-[family-name:var(--font-body)] text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">
                 Arte & Diseño
               </span>
-            </div>
+            </span>
           </Link>
 
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-widest text-white border border-white/10 hover:bg-white/10 transition-all active:scale-95"
+          <nav
+            className="hidden items-center gap-0.5 lg:flex"
+            aria-label="Navegación principal"
           >
-            <div className="flex flex-col gap-1 w-5">
+            {links.map((link) => (
+              <NavLink key={link.href} href={link.href} label={link.label} />
+            ))}
+          </nav>
+
+          <a
+            href={site.whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden min-h-11 items-center justify-center gap-2 rounded-xl border border-red-400/25 bg-red-500/[0.1] px-4 font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.1em] text-white transition-all hover:-translate-y-0.5 hover:border-red-300/40 hover:bg-red-600 xl:inline-flex"
+          >
+            <span
+              className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.85)]"
+              aria-hidden="true"
+            />
+            WhatsApp
+          </a>
+
+          <button
+            ref={menuButtonRef}
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white transition-all hover:border-white/20 hover:bg-white/[0.09] active:scale-95 lg:hidden"
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+          >
+            <span className="relative block h-5 w-5" aria-hidden="true">
               <span
-                className={`h-0.5 w-full bg-current transition-all ${
-                  open ? "rotate-45 translate-y-1.5 text-red-500" : ""
-                }`}
+                className={[
+                  "absolute left-0 top-1 block h-0.5 w-5 rounded-full bg-current transition-transform duration-200",
+                  open ? "translate-y-[6px] rotate-45 text-red-400" : "",
+                ].join(" ")}
               />
               <span
-                className={`h-0.5 w-full bg-current transition-all ${
-                  open ? "opacity-0" : ""
-                }`}
+                className={[
+                  "absolute left-0 top-[9px] block h-0.5 w-5 rounded-full bg-current transition-opacity duration-200",
+                  open ? "opacity-0" : "",
+                ].join(" ")}
               />
               <span
-                className={`h-0.5 w-full bg-current transition-all ${
-                  open ? "-rotate-45 -translate-y-1.5 text-red-500" : ""
-                }`}
+                className={[
+                  "absolute bottom-1 left-0 block h-0.5 w-5 rounded-full bg-current transition-transform duration-200",
+                  open ? "-translate-y-[6px] -rotate-45 text-red-400" : "",
+                ].join(" ")}
               />
-            </div>
+            </span>
           </button>
         </div>
+      </Container>
 
-        {/* Menú Desplegable */}
-        {open && (
-          <div className="pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
-            <nav className="flex flex-col gap-2 border-t border-white/5 pt-6">
-              {links.map((l) => (
+      <div
+        ref={menuPanelRef}
+        id="mobile-navigation"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navegación principal"
+        aria-hidden={!open}
+        className={[
+          "absolute inset-x-0 top-full h-[calc(100dvh-72px)] overflow-hidden border-t border-white/[0.07] bg-[#08080a] shadow-[0_30px_80px_-24px_rgba(0,0,0,1)] transition-all duration-300 sm:h-[calc(100dvh-80px)] lg:hidden",
+          open
+            ? "visible translate-y-0 opacity-100"
+            : "invisible -translate-y-2 opacity-0",
+        ].join(" ")}
+      >
+        <div className="grain-overlay pointer-events-none absolute inset-0 opacity-25" />
+        <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-red-700/[0.09] blur-[100px]" />
+
+        <Container className="relative h-full">
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="flex shrink-0 items-center justify-between gap-4 py-4">
+              <div className="eyebrow">Menú</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/55">
+                @{site.handle}
+              </div>
+            </div>
+
+            <nav
+              className="grid min-h-0 flex-1 auto-rows-min gap-2 overflow-y-auto overscroll-contain pb-4 sm:grid-cols-2 sm:content-start"
+              aria-label="Navegación mobile"
+            >
+              {links.map((link, index) => (
                 <NavLink
-                  key={l.href}
-                  href={l.href}
-                  label={l.label}
+                  key={link.href}
+                  href={link.href}
+                  label={link.label}
+                  index={index}
+                  mobile
+                  linkRef={index === 0 ? firstMobileLinkRef : undefined}
                   onNavigate={() => setOpen(false)}
                 />
               ))}
-
-              <a
-                href={site.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 flex items-center justify-center gap-3 rounded-xl bg-white text-black px-6 py-4 text-sm font-black uppercase tracking-widest transition-all hover:bg-red-600 hover:text-white active:scale-95 shadow-xl shadow-white/5"
-              >
-                Instagram
-              </a>
             </nav>
+
+            <div className="shrink-0 border-t border-white/[0.08] bg-[#08080a]/95 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={site.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="primary-action px-4"
+                >
+                  WhatsApp
+                </a>
+                <a
+                  href={site.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="secondary-action px-4"
+                >
+                  Instagram
+                </a>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-4 text-[10px] font-medium uppercase tracking-[0.1em] text-white/50">
+                <span>{site.brand}</span>
+                <span>Arte & Diseño</span>
+              </div>
+            </div>
           </div>
-        )}
-      </Container>
+        </Container>
+      </div>
     </header>
   );
 }

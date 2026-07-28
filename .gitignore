@@ -9,3 +9,7 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+*.tsbuildinfo
+.next-dev.*.log
+data/gallery/*
+!data/gallery/.gitkeep

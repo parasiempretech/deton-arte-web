@@ -2,78 +2,273 @@
 @tailwind components;
 @tailwind utilities;
 
-/* -------------------------------------------------------------------------- */
-/* 1. VARIABLES CSS (SIN CAMBIOS)                                       */
-/* -------------------------------------------------------------------------- */
-
-/* Mantenemos las variables CSS para mantener el esquema de color neón/rockero */
 :root {
   color-scheme: dark;
-  --color-primary: 255, 0, 119; /* Rosa neón/Magenta para acentos */
-  --color-selection: 255, 255, 255;
-  --opacity-selection: 0.18;
+  --page: #070708;
+  --page-deep: #030304;
+  --surface: #101012;
+  --surface-raised: #171719;
+  --line: rgba(255, 255, 255, 0.11);
+  --line-strong: rgba(255, 255, 255, 0.18);
+  --muted: rgba(255, 255, 255, 0.64);
+  --accent: #f02f3c;
+  --accent-strong: #cf1422;
+  --blush: #f3b5a6;
+  --warm: #f6cf76;
+  --paper: #f5eee7;
 }
 
-/* -------------------------------------------------------------------------- */
-/* 2. BASE GLOBAL (SIN CAMBIOS)                                         */
-/* -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
 
-html,
+html {
+  min-width: 320px;
+  background: var(--page);
+  scroll-padding-top: 6.5rem;
+}
+
 body {
-  height: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 7% 10%, rgba(240, 47, 60, 0.075), transparent 27rem),
+    radial-gradient(circle at 96% 42%, rgba(243, 181, 166, 0.035), transparent 32rem),
+    var(--page);
+  color: #f7f7f8;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-feature-settings: "kern", "liga", "calt";
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  font-synthesis: none;
+  letter-spacing: -0.006em;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-  @apply bg-ink-950 text-gray-100 antialiased leading-relaxed;
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-optical-sizing: auto;
+  font-synthesis: none;
 }
 
-/* -------------------------------------------------------------------------- */
-/* 3. ACCESIBILIDAD Y EFECTOS (SIN ERRORES)                               */
-/* -------------------------------------------------------------------------- */
+p {
+  text-wrap: pretty;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+img {
+  max-width: 100%;
+}
+
+body[data-menu-open="true"] [data-quick-contact] {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+body[data-gallery-open="true"] [data-quick-contact] {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(240, 47, 60, 0.42);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(246, 207, 118, 0.95);
+  outline-offset: 4px;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
   }
+
+  .page-enter {
+    animation: page-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .art-drift {
+    animation: art-drift 9s ease-in-out infinite alternate;
+  }
+
+  .soft-pulse {
+    animation: soft-pulse 3.2s ease-in-out infinite;
+  }
 }
 
-/* Selección de Texto usando la variable (rgba(var(--color-primary), 0.4)) */
-::selection {
-  background: rgba(var(--color-primary), 0.4);
-  color: white;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-/* Foco Visible usando la variable */
-:focus-visible {
-  outline: 2px solid rgba(var(--color-primary), 0.9);
-  outline-offset: 4px;
-  border-radius: 4px;
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 11px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #070708;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid #070708;
+    border-radius: 999px;
+    background: #33333a;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4a4a54;
+  }
 }
 
-/* -------------------------------------------------------------------------- */
-/* 4. DISEÑO DE COMPONENTES BASE (¡CORRECCIÓN AQUÍ!)                   */
-/* -------------------------------------------------------------------------- */
+@layer components {
+  .surface-card {
+    @apply rounded-[1.75rem] border border-white/10 bg-white/[0.035] shadow-[0_30px_100px_-46px_rgba(0,0,0,0.95)] backdrop-blur-sm;
+    background-image: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.038),
+      rgba(255, 255, 255, 0.012) 48%,
+      rgba(240, 47, 60, 0.018)
+    );
+  }
 
-/* Mejora de Tipografía: Estilo para Títulos */
-h1,
-h2,
-h3 {
-  @apply mb-4 mt-6;
+  .surface-panel {
+    @apply rounded-2xl border border-white/[0.09] bg-black/20;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.16em] text-red-300 sm:text-xs;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 1.75rem;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--warm));
+  }
+
+  .display-title {
+    @apply text-balance font-[family-name:var(--font-display)] text-[clamp(2.8rem,6.2vw,5.35rem)] font-semibold leading-[0.94] tracking-[-0.035em] text-white;
+  }
+
+  .section-title {
+    @apply text-balance font-[family-name:var(--font-display)] text-[clamp(2.25rem,4.3vw,4rem)] font-semibold leading-[0.98] tracking-[-0.032em] text-white;
+  }
+
+  .lead-copy {
+    @apply max-w-[38rem] text-pretty font-[family-name:var(--font-display)] text-[clamp(1.18rem,2vw,1.45rem)] font-normal leading-[1.45] tracking-[-0.018em] text-white/[0.72];
+  }
+
+  .primary-action {
+    @apply inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-xl bg-red-600 px-7 py-3.5 text-center font-[family-name:var(--font-body)] text-[13px] font-semibold uppercase tracking-[0.075em] text-white shadow-[0_18px_45px_-18px_rgba(240,47,60,0.85)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-500 active:translate-y-0 active:bg-red-700;
+  }
+
+  .secondary-action {
+    @apply inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-xl border border-white/[0.14] bg-white/[0.045] px-7 py-3.5 text-center font-[family-name:var(--font-body)] text-[13px] font-semibold uppercase tracking-[0.075em] text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.09] active:translate-y-0;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(240, 47, 60, 0.45) 24%,
+      rgba(246, 207, 118, 0.26) 50%,
+      rgba(255, 255, 255, 0.08) 72%,
+      transparent
+    );
+  }
+
+  .grain-overlay {
+    background-image:
+      repeating-linear-gradient(
+        115deg,
+        transparent 0,
+        transparent 8px,
+        rgba(255, 255, 255, 0.012) 9px,
+        transparent 10px
+      ),
+      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px);
+    background-size: auto, 9px 9px;
+    mix-blend-mode: soft-light;
+  }
+
+  .brush-mark {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .brush-mark::after {
+    position: absolute;
+    z-index: -1;
+    right: -0.08em;
+    bottom: 0.08em;
+    left: -0.08em;
+    height: 0.22em;
+    content: "";
+    transform: rotate(-1.25deg);
+    border-radius: 999px 30% 999px 20%;
+    background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+    opacity: 0.8;
+  }
 }
 
-a {
-  /*
-   * CORRECCIÓN: Reemplazamos 'text-primary-300' por 'text-pink-400'
-   * y 'hover:text-primary-400' por 'hover:text-pink-300'.
-   * 'pink' es un color base de Tailwind que se asemeja a tu color neón (255, 0, 119)
-   * y NO causará error de compilación.
-   */
-  @apply text-pink-400 hover:text-pink-300 transition-colors duration-200;
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* Ejemplo: Estilo para botones principales (si no lo tienes definido en un componente) */
-.btn-primary {
-  /* Usamos 'pink' en el botón también para consistencia */
-  @apply bg-pink-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg
-         hover:bg-pink-600 transition-colors duration-300;
+@keyframes art-drift {
+  from {
+    transform: translate3d(0, -4px, 0) rotate(-1.2deg);
+  }
+  to {
+    transform: translate3d(0, 6px, 0) rotate(0.4deg);
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(240, 47, 60, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(240, 47, 60, 0.08);
+  }
 }

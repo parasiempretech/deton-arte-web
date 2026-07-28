@@ -2,7 +2,13 @@ export const site = {
   brand: "Deton Arte",
   handle: "deton.arte",
   instagramUrl: "https://www.instagram.com/deton.arte/",
-  hours: "10:00 a 20:00",
+  phone: "1132312327",
+  whatsappUrl: "https://wa.me/5491132312327",
+  email: "Deton.arte@hotmail.com",
+  emailUrl: "mailto:Deton.arte@hotmail.com",
+  hours: "de lunes a viernes, de 10 a 19 hs",
+  studioName: "Eversys Solutions",
+  studioUrl: "https://www.instagram.com/eversys.solutions/",
   deposit: "Seña del 50% (obligatoria)",
   installments: "3 cuotas con 15% de recargo",
 };
@@ -15,11 +21,40 @@ export const categories: Array<{
   subtitle: string;
   href: string;
   cta: string;
-  pricingMode: "estimativo" | "a_medida";
 }> = [
-  { key: "cuadros", title: "Cuadros", subtitle: "Piezas a pedido, hechas a mano.", href: "/cuadros", cta: "Ver cuadros", pricingMode: "estimativo" },
-  { key: "mascotas", title: "Mascotas", subtitle: "Retratos con alma. Ideal para regalar.", href: "/mascotas", cta: "Ver retratos", pricingMode: "estimativo" },
-  { key: "murales", title: "Murales", subtitle: "Interiores y exteriores. Cada proyecto es único.", href: "/murales", cta: "Ver murales", pricingMode: "a_medida" },
-  { key: "telas", title: "Telas / Banderas", subtitle: "Diseños sobre tela por encargo.", href: "/telas", cta: "Ver telas", pricingMode: "a_medida" },
-  { key: "cositas", title: "Cositas", subtitle: "Piezas varias e intervenidas. Únicas.", href: "/cositas", cta: "Ver cositas", pricingMode: "a_medida" },
+  {
+    key: "cuadros",
+    title: "Cuadros",
+    subtitle: "Piezas a pedido, hechas a mano.",
+    href: "/cuadros",
+    cta: "Ver cuadros",
+  },
+  {
+    key: "mascotas",
+    title: "Mascotas",
+    subtitle: "Retratos con alma. Ideal para regalar.",
+    href: "/mascotas",
+    cta: "Ver retratos",
+  },
+  {
+    key: "murales",
+    title: "Murales",
+    subtitle: "Interiores y exteriores. Cada proyecto es único.",
+    href: "/murales",
+    cta: "Ver murales",
+  },
+  {
+    key: "telas",
+    title: "Telas / Banderas",
+    subtitle: "Diseños sobre tela por encargo.",
+    href: "/telas",
+    cta: "Ver telas",
+  },
+  {
+    key: "cositas",
+    title: "Cositas",
+    subtitle: "Piezas varias e intervenidas. Únicas.",
+    href: "/cositas",
+    cta: "Ver cositas",
+  },
 ];

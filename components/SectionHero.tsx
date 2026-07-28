@@ -8,62 +8,172 @@ type Props = {
   subtitle: string;
   coverSrc: string;
   badge?: string;
+  variant?: "cover" | "portrait";
 };
 
-export function SectionHero({ title, subtitle, coverSrc, badge }: Props) {
+function HeroCopy({
+  title,
+  subtitle,
+  badge,
+  compact = false,
+}: Pick<Props, "title" | "subtitle" | "badge"> & { compact?: boolean }) {
   return (
-    <section className="relative overflow-hidden border-b border-white/10">
-      {/* Fondo */}
-      <div className="absolute inset-0">
+    <div className="min-w-0 max-w-3xl">
+      <Badge className="shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)]">
+        {badge ?? `@${site.handle}`}
+      </Badge>
+
+      <h1
+        className={[
+          "display-title mt-6 max-w-[13ch] [text-shadow:0_18px_50px_rgba(0,0,0,.58)]",
+          compact ? "lg:text-[5.4rem]" : "",
+        ].join(" ")}
+      >
+        {title}
+      </h1>
+
+      <p className="lead-copy mt-6">
+        {subtitle}
+      </p>
+
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a
+          href={site.instagramUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="primary-action w-full sm:w-auto"
+        >
+          Hablemos por Instagram
+          <span aria-hidden="true">↗</span>
+        </a>
+        <a
+          href={site.whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="secondary-action w-full sm:w-auto"
+        >
+          WhatsApp
+        </a>
+      </div>
+
+      <p className="mt-4 max-w-xl text-sm leading-6 text-white/[0.56]">
+        Enviame una referencia y medidas aproximadas para orientarte mejor.
+      </p>
+    </div>
+  );
+}
+
+function PortraitHero({
+  title,
+  subtitle,
+  coverSrc,
+  badge,
+}: Omit<Props, "variant">) {
+  return (
+    <section className="relative isolate overflow-hidden border-b border-white/[0.08] bg-[#070708]">
+      <div className="absolute inset-0 -z-30">
         <Image
           src={coverSrc}
           alt=""
           fill
-          className="object-cover opacity-55"
-          priority
+          className="scale-110 object-cover object-center opacity-[0.07] blur-2xl"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink-950/20 via-ink-950/75 to-ink-950" />
-        <div className="absolute inset-0 [background:radial-gradient(80%_60%_at_50%_40%,rgba(0,0,0,0)_0%,rgba(0,0,0,.55)_70%,rgba(0,0,0,.8)_100%)]" />
       </div>
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_76%_38%,rgba(240,47,60,0.12),transparent_28rem),linear-gradient(100deg,#070708_6%,rgba(7,7,8,0.97)_53%,rgba(7,7,8,0.8)_100%)]" />
+      <div className="grain-overlay absolute inset-0 -z-10 opacity-45" />
 
       <Container>
-        <div className="relative pt-6 pb-10 sm:pt-16 sm:pb-16">
-          {/* Encabezado */}
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge>{badge ?? `@${site.handle}`}</Badge>
-            </div>
+        <div className="grid min-h-[620px] items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14 lg:py-10">
+          <HeroCopy
+            title={title}
+            subtitle={subtitle}
+            badge={badge}
+            compact
+          />
 
-            <h1 className="max-w-4xl text-3xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              {title}
-            </h1>
+          <div className="relative mx-auto w-full max-w-[500px] lg:justify-self-end">
+            <div className="absolute inset-[8%] rounded-full bg-red-600/[0.12] blur-[70px]" />
 
-            <p className="max-w-2xl text-sm leading-relaxed text-white/85 sm:text-lg">
-              {subtitle}
-            </p>
-
-            {/* CTA único */}
-            <div className="mt-3">
-              <a
-                href={site.instagramUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-full items-center justify-center rounded-2xl border border-red-500/40 bg-red-600/10 backdrop-blur-sm px-7 py-3.5 text-base font-bold text-white transition shadow-md shadow-black/20
-                           hover:bg-red-600/20 hover:border-red-500/60 active:bg-red-600/30 sm:w-auto
-                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
-              >
-                Hablemos por Instagram
-              </a>
-
-              <p className="mt-3 max-w-xl text-sm text-white/70">
-                Enviame una referencia y medidas aproximadas para orientarte
-                mejor.
-              </p>
-            </div>
+            <figure className="group relative mx-auto w-[82%] sm:w-[78%] lg:w-[86%]">
+              <Image
+                src={coverSrc}
+                alt="Deton AR73"
+                width={1153}
+                height={1612}
+                priority
+                className="h-auto w-full drop-shadow-[0_34px_45px_rgba(0,0,0,0.52)] transition-transform duration-700 ease-out group-hover:-translate-y-1 group-hover:scale-[1.006]"
+                sizes="(max-width: 640px) 82vw, (max-width: 1024px) 62vw, 430px"
+              />
+              <figcaption className="mt-4 flex items-center gap-3">
+                <span className="h-px w-8 bg-gradient-to-r from-red-500 to-amber-200/70" />
+                <span className="font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.16em] text-red-300/75">
+                  @{site.handle}
+                </span>
+              </figcaption>
+            </figure>
           </div>
         </div>
       </Container>
+    </section>
+  );
+}
+
+export function SectionHero({
+  title,
+  subtitle,
+  coverSrc,
+  badge,
+  variant = "cover",
+}: Props) {
+  if (variant === "portrait") {
+    return (
+      <PortraitHero
+        title={title}
+        subtitle={subtitle}
+        coverSrc={coverSrc}
+        badge={badge}
+      />
+    );
+  }
+
+  return (
+    <section className="relative isolate min-h-[520px] overflow-hidden border-b border-white/[0.08] sm:min-h-[590px]">
+      <div className="absolute inset-0 -z-30">
+        <Image
+          src={coverSrc}
+          alt=""
+          fill
+          className="scale-[1.02] object-cover object-center"
+          priority
+          sizes="100vw"
+        />
+      </div>
+
+      <div className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(4,4,5,0.99)_0%,rgba(4,4,5,0.93)_38%,rgba(4,4,5,0.46)_72%,rgba(4,4,5,0.35)_100%)] max-sm:bg-[linear-gradient(180deg,rgba(4,4,5,0.38)_0%,rgba(4,4,5,0.74)_38%,rgba(4,4,5,0.98)_100%)]" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#070708] via-transparent to-black/30" />
+      <div className="grain-overlay absolute inset-0 -z-10 opacity-55" />
+
+      <div
+        className="absolute bottom-0 left-0 top-0 hidden w-px bg-gradient-to-b from-transparent via-red-500/40 to-transparent lg:block"
+        style={{ left: "max(2rem, calc((100vw - 80rem) / 2))" }}
+      />
+
+      <Container>
+        <div className="flex min-h-[520px] items-end py-12 sm:min-h-[590px] sm:py-16 lg:items-center lg:py-20">
+          <HeroCopy title={title} subtitle={subtitle} badge={badge} />
+        </div>
+      </Container>
+
+      <div
+        aria-hidden="true"
+        className="absolute bottom-7 right-7 hidden items-center gap-3 lg:flex"
+      >
+        <span className="h-px w-10 bg-white/25" />
+        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/60">
+          {site.brand}
+        </span>
+      </div>
     </section>
   );
 }

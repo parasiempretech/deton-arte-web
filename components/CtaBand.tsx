@@ -1,5 +1,4 @@
-"use client";
-
+import Image from "next/image";
 import { Container } from "./Container";
 import { site } from "@/lib/site";
 
@@ -11,59 +10,50 @@ export function CtaBand({
   text?: string;
 }) {
   return (
-    <section className="py-20 relative overflow-hidden group">
-      {/* TRUCO DE PROGRAMADOR SENIOR:
-          Efecto de "Radial Mesh" rojo en las esquinas que solo aparece
-          suavemente al interactuar con la sección.
-      */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-600/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-red-600/10 transition-colors duration-1000" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-600/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2 group-hover:bg-red-600/10 transition-colors duration-1000" />
-
+    <section className="relative py-8 sm:py-12">
       <Container>
-        <div className="relative rounded-[2.5rem] border border-white/5 bg-[#050505] p-8 sm:p-14 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden">
-          {/* Borde de luz roja superior (Subtle Highlight) */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
+        <div className="relative isolate overflow-hidden rounded-[2rem] border border-red-300/20 bg-[linear-gradient(115deg,#211215_0%,#111113_45%,#0b0b0d_100%)] p-7 shadow-[0_36px_100px_-48px_rgba(220,20,35,0.65)] sm:p-10 lg:p-14">
+          <div className="absolute -right-20 -top-20 -z-10 h-80 w-80 rounded-full bg-red-600/[0.15] blur-[95px]" />
+          <div className="grain-overlay absolute inset-0 -z-10 opacity-50" />
+          <div className="absolute -bottom-28 -right-8 -z-10 h-80 w-80 opacity-[0.09] sm:-right-2">
+            <Image
+              src="/logodeton.png"
+              alt=""
+              fill
+              className="object-contain"
+              sizes="320px"
+            />
+          </div>
 
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
-            <div className="max-w-xl">
-              <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-white">
-                {title}
-              </h2>
-
-              <p className="mt-6 text-base sm:text-lg text-white/40 leading-relaxed font-medium">
+          <div className="grid gap-9 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="max-w-2xl">
+              <div className="eyebrow">Arte personalizado</div>
+              <h2 className="section-title mt-5">{title}</h2>
+              <p className="lead-copy mt-5">
                 {text}
               </p>
             </div>
 
-            <div className="flex flex-col items-start lg:items-end gap-6">
+            <div className="relative flex flex-col gap-3 sm:flex-row lg:flex-col">
               <a
                 href={site.instagramUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="group/btn relative inline-flex items-center justify-center rounded-2xl bg-white px-10 py-5 text-sm font-black text-black transition-all duration-300 hover:bg-red-600 hover:text-white hover:scale-[1.03] active:scale-[0.97] overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(220,38,38,0.4)]"
+                className="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-center font-[family-name:var(--font-body)] text-[13px] font-semibold uppercase tracking-[0.075em] text-black shadow-xl shadow-black/25 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-500 hover:text-white active:translate-y-0"
               >
-                {/* TRUCO UX:
-                    El cambio de color de blanco a rojo en hover genera
-                    un sentido de urgencia y pasión por el arte.
-                */}
-                <span className="relative z-10">Escribirme por Instagram</span>
+                Escribirme por Instagram
+                <span aria-hidden="true">↗</span>
               </a>
-
-              {/* Detalle visual mínimo en rojo */}
-              <div className="flex items-center gap-3 px-2">
-                <div className="h-px w-8 bg-red-600/50" />
-                <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-red-500/80">
-                  Arte Personalizado
-                </span>
-              </div>
+              <a
+                href={site.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="secondary-action"
+              >
+                WhatsApp
+              </a>
             </div>
           </div>
-
-          {/* DETALLE UI SENIOR:
-              Una máscara de ruido o textura sutil que se ve solo en monitores de alta gama
-              para que el negro no se vea "plano".
-          */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
         </div>
       </Container>
     </section>

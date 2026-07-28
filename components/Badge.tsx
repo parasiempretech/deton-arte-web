@@ -9,7 +9,7 @@ export function Badge({ children, className = "" }: Props) {
   return (
     <span
       className={[
-        "inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80",
+        "inline-flex min-h-8 items-center rounded-full border border-red-300/30 bg-[#1b1012]/70 px-3.5 py-1 font-[family-name:var(--font-body)] text-[11px] font-semibold uppercase tracking-[0.14em] text-red-100 backdrop-blur-xl",
         className,
       ].join(" ")}
     >
