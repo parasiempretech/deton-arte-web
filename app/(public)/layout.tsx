@@ -2,6 +2,8 @@ import { ContactDock } from "@/components/ContactDock";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 
+export const dynamic = "force-dynamic";
+
 export default function PublicLayout({
   children,
 }: {

@@ -1,4 +1,3 @@
-import { revalidatePath } from "next/cache";
 import { authorizeMutation } from "@/lib/admin/auth";
 import { isCategoryKey } from "@/lib/admin/constants";
 import {
@@ -36,8 +35,6 @@ export async function POST(request: Request) {
     }
 
     const item = await saveFilesystemUpload(file, category);
-    revalidatePath(`/${category}`);
-    revalidatePath("/panel");
 
     return Response.json(
       { item },
@@ -80,8 +77,6 @@ export async function DELETE(request: Request) {
       await deleteManagedImage(body.category, body.id);
     }
 
-    revalidatePath(`/${body.category}`);
-    revalidatePath("/panel");
     return Response.json(
       { ok: true },
       { headers: { "Cache-Control": "no-store" } },

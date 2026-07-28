@@ -3,7 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { Ref } from "react";
 import { categories, site } from "@/lib/site";
 import { Container } from "./Container";
@@ -93,7 +99,8 @@ export function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuDetailsRef = useRef<HTMLDetailsElement>(null);
+  const menuButtonRef = useRef<HTMLElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
 
   const links = useMemo(
@@ -108,14 +115,19 @@ export function Nav() {
     []
   );
 
-  useEffect(() => {
+  const closeMenu = useCallback(() => {
+    menuDetailsRef.current?.removeAttribute("open");
     setOpen(false);
-  }, [pathname]);
+  }, []);
+
+  useEffect(() => {
+    closeMenu();
+  }, [closeMenu, pathname]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape" && open) {
-        setOpen(false);
+        closeMenu();
         menuButtonRef.current?.focus();
       }
 
@@ -141,17 +153,17 @@ export function Nav() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [closeMenu, open]);
 
   useEffect(() => {
     const desktopQuery = window.matchMedia("(min-width: 1024px)");
     const closeOnDesktop = () => {
-      if (desktopQuery.matches) setOpen(false);
+      if (desktopQuery.matches) closeMenu();
     };
 
     desktopQuery.addEventListener("change", closeOnDesktop);
     return () => desktopQuery.removeEventListener("change", closeOnDesktop);
-  }, []);
+  }, [closeMenu]);
 
   useEffect(() => {
     if (!open) return;
@@ -223,109 +235,92 @@ export function Nav() {
             WhatsApp
           </a>
 
-          <button
-            ref={menuButtonRef}
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white transition-colors hover:border-white/20 hover:bg-white/[0.09] active:bg-white/[0.12] lg:hidden"
-            aria-expanded={open}
-            aria-controls="mobile-navigation"
-            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+          <details
+            ref={menuDetailsRef}
+            onToggle={(event) => setOpen(event.currentTarget.open)}
+            className="group shrink-0 lg:hidden"
           >
-            <span className="relative block h-5 w-5" aria-hidden="true">
-              <span
-                className={[
-                  "absolute left-0 top-1 block h-0.5 w-5 rounded-full bg-current transition-transform duration-200",
-                  open ? "translate-y-[6px] rotate-45 text-red-400" : "",
-                ].join(" ")}
-              />
-              <span
-                className={[
-                  "absolute left-0 top-[9px] block h-0.5 w-5 rounded-full bg-current transition-opacity duration-200",
-                  open ? "opacity-0" : "",
-                ].join(" ")}
-              />
-              <span
-                className={[
-                  "absolute bottom-1 left-0 block h-0.5 w-5 rounded-full bg-current transition-transform duration-200",
-                  open ? "-translate-y-[6px] -rotate-45 text-red-400" : "",
-                ].join(" ")}
-              />
-            </span>
-          </button>
+            <summary
+              ref={menuButtonRef}
+              className="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white transition-colors hover:border-white/20 hover:bg-white/[0.09] active:bg-white/[0.12] [&::-webkit-details-marker]:hidden"
+              aria-controls="mobile-navigation"
+              aria-label="Abrir o cerrar menú"
+            >
+              <span className="relative block h-5 w-5" aria-hidden="true">
+                <span className="absolute left-0 top-1 block h-0.5 w-5 rounded-full bg-current transition-transform duration-200 group-open:translate-y-[6px] group-open:rotate-45 group-open:text-red-400" />
+                <span className="absolute left-0 top-[9px] block h-0.5 w-5 rounded-full bg-current transition-opacity duration-200 group-open:opacity-0" />
+                <span className="absolute bottom-1 left-0 block h-0.5 w-5 rounded-full bg-current transition-transform duration-200 group-open:-translate-y-[6px] group-open:-rotate-45 group-open:text-red-400" />
+              </span>
+            </summary>
+
+            <div
+              ref={menuPanelRef}
+              id="mobile-navigation"
+              aria-label="Navegación principal"
+              className="fixed inset-x-0 top-[72px] h-[calc(100dvh-72px)] overflow-hidden border-t border-white/[0.07] bg-[#08080a] shadow-[0_24px_60px_-28px_rgba(0,0,0,0.95)] sm:top-[80px] sm:h-[calc(100dvh-80px)]"
+            >
+              <div className="grain-overlay pointer-events-none absolute inset-0 opacity-15" />
+
+              <Container className="relative h-full">
+                <div className="flex h-full min-h-0 flex-col">
+                  <div className="flex shrink-0 items-center justify-between gap-4 py-4">
+                    <div className="eyebrow">Menú</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/55">
+                      @{site.handle}
+                    </div>
+                  </div>
+
+                  <nav
+                    className="grid min-h-0 flex-1 auto-rows-min gap-2 overflow-y-auto overscroll-contain pb-4 sm:grid-cols-2 sm:content-start"
+                    aria-label="Navegación móvil"
+                  >
+                    {links.map((link, index) => (
+                      <NavLink
+                        key={link.href}
+                        href={link.href}
+                        label={link.label}
+                        index={index}
+                        mobile
+                        linkRef={
+                          index === 0 ? firstMobileLinkRef : undefined
+                        }
+                        onNavigate={closeMenu}
+                      />
+                    ))}
+                  </nav>
+
+                  <div className="shrink-0 border-t border-white/[0.08] bg-[#08080a]/95 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      <a
+                        href={site.whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="primary-action px-4"
+                      >
+                        WhatsApp
+                      </a>
+                      <a
+                        href={site.instagramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="secondary-action px-4"
+                      >
+                        Instagram
+                      </a>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-4 text-[10px] font-medium uppercase tracking-[0.1em] text-white/50">
+                      <span>{site.brand}</span>
+                      <span>Arte & Diseño</span>
+                    </div>
+                  </div>
+                </div>
+              </Container>
+            </div>
+          </details>
         </div>
       </Container>
 
-      <div
-        ref={menuPanelRef}
-        id="mobile-navigation"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Navegación principal"
-        aria-hidden={!open}
-        className={[
-          "absolute inset-x-0 top-full h-[calc(100dvh-72px)] overflow-hidden border-t border-white/[0.07] bg-[#08080a] shadow-[0_24px_60px_-28px_rgba(0,0,0,0.95)] transition-[opacity,transform,visibility] duration-300 sm:h-[calc(100dvh-80px)] lg:hidden",
-          open
-            ? "visible translate-y-0 opacity-100"
-            : "invisible -translate-y-2 opacity-0",
-        ].join(" ")}
-      >
-        <div className="grain-overlay pointer-events-none absolute inset-0 opacity-15" />
-
-        <Container className="relative h-full">
-          <div className="flex h-full min-h-0 flex-col">
-            <div className="flex shrink-0 items-center justify-between gap-4 py-4">
-              <div className="eyebrow">Menú</div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/55">
-                @{site.handle}
-              </div>
-            </div>
-
-            <nav
-              className="grid min-h-0 flex-1 auto-rows-min gap-2 overflow-y-auto overscroll-contain pb-4 sm:grid-cols-2 sm:content-start"
-              aria-label="Navegación móvil"
-            >
-              {links.map((link, index) => (
-                <NavLink
-                  key={link.href}
-                  href={link.href}
-                  label={link.label}
-                  index={index}
-                  mobile
-                  linkRef={index === 0 ? firstMobileLinkRef : undefined}
-                  onNavigate={() => setOpen(false)}
-                />
-              ))}
-            </nav>
-
-            <div className="shrink-0 border-t border-white/[0.08] bg-[#08080a]/95 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={site.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="primary-action px-4"
-                >
-                  WhatsApp
-                </a>
-                <a
-                  href={site.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="secondary-action px-4"
-                >
-                  Instagram
-                </a>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between gap-4 text-[10px] font-medium uppercase tracking-[0.1em] text-white/50">
-                <span>{site.brand}</span>
-                <span>Arte & Diseño</span>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </div>
     </header>
   );
 }
